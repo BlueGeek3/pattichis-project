@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.*
+
+# Conda
+.conda/
+conda-meta/
+
+# Node/React/Expo
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+.expo/
+.expo-shared/
+dist/
+build/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+
+# Python virtualenvs (any folder named venv/.venv/env/ENV anywhere)
+venv/
+.venv/
+env/
+ENV/
+**/venv/
+**/.venv/
+**/env/
+**/ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.conda/
+conda-meta/
+.mypy_cache/
+.pytest_cache/
+.coverage
+
+/Tree_And_Files_Output.txt
