@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "npx wait-on tcp:127.0.0.1:3306 && nodemon src/server.js",
+    "start": "node src/server.js",
+    "dev:nowait": "nodemon src/server.js"
+  }
+}
