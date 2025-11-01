@@ -9,7 +9,7 @@ app.use(cors());                 // allow mobile/web during dev
 app.use(express.json());
 app.use(morgan("dev"));
 
-app.use("/ms-api", api);         // base path stays similar to your PHP ms-api
+app.use("/ms-api", api);         // oooooooobase path stays similar to your PHP ms-api
 
 app.get("/", (_req, res) => res.json({ status: "ok" }));
 
