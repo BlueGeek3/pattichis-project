@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { List, Text } from "react-native-paper";
 import { listHistory } from "../lib/api";
