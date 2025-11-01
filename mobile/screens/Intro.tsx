@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Image, StyleSheet, Pressable, Text } from "react-native";
-import bg from "../assets/bg-intro.png"; // or .png if that's your file
+// import bg from "../assets/bg-intro.png"; // or .png if that's your file
+const bg = require("../assets/bg-intro.png");
+
 
 export default function Intro({ navigation }: any) {
   return (
