@@ -19,6 +19,7 @@ SHALLOW = {
     ".vs": True,
     ".github": True,
     "mobile/node_modules": True,
+    "backend/node_modules": True,
     ".conda": True,
     "backend/venv": True
 }
@@ -27,8 +28,6 @@ SHALLOW = {
 # [] means full file; otherwise list of (start, end) 1-based inclusive ranges.
 DISPLAY_FILES_WITH_RANGES = {
     "backend/.env": [],
-    "backend/app/main.py": [],
-    "backend/requirements.txt": [],
     "mobile/App.tsx": [],
     "mobile/screens/History.tsx": [],
     "mobile/screens/Home.tsx": [], #"mobile/screens/Home.tsx": [(1,23)], Example of ranges
