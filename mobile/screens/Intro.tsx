@@ -1,42 +1,58 @@
 import React from "react";
-import { ImageBackground, SafeAreaView, View, Pressable, Text, StyleSheet } from "react-native";
+import {
+  ImageBackground,
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+  Platform,
+} from "react-native";
+
 const bg = require("../assets/bg-intro.png");
 
 export default function Intro({ navigation }: any) {
+  const { height } = useWindowDimensions();
+  const topOffset = height * 0.20;     // 30% from top
+  const bottomOffset = height * 0.20;  // 20% from bottom
+  const isWeb = Platform.OS === "web";
+
   return (
     <ImageBackground
       source={bg}
-      style={styles.bg}
-      resizeMode="cover"           // fill the screen; may crop edges
+      resizeMode="cover"
+      style={[styles.bg, isWeb && { height, width: "100%" }]} // web-only: fill viewport
     >
-      {/* Optional soft tint over image */}
-      <View style={styles.overlay} />
+      {/* Title ~30% from top */}
+      <View style={[styles.titleWrap, { top: topOffset }]}>
+        <Text style={styles.title}>My MS Diary</Text>
+      </View>
 
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.content}>
-          <Text style={styles.title}>My MS Diary</Text>
-          <Pressable
-            onPress={() => navigation.replace("Tabs")}
-            style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
-          >
-            <Text style={styles.btnText}>Get Started</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      {/* Button ~20% from bottom */}
+      <View style={[styles.btnWrap, { bottom: bottomOffset }]}>
+        <Pressable
+          onPress={() => navigation.replace("Tabs")}
+          style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
+        >
+          <Text style={styles.btnText}>Get Started</Text>
+        </Pressable>
+      </View>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255, 233, 209, 0.35)", // optional warm tint
+  titleWrap: { position: "absolute", width: "100%", alignItems: "center" },
+  btnWrap:   { position: "absolute", width: "100%", alignItems: "center" },
+  title: { fontSize: 28, fontWeight: "700", color: "#2A2A2A" },
+  btn: {
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 24,
+    backgroundColor: "#4A4A4A",
+    elevation: 4,
   },
-  safe: { flex: 1 },
-  content: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  title: { fontSize: 28, fontWeight: "700", color: "#2A2A2A", marginBottom: 24 },
-  btn: { marginTop: 24, paddingVertical: 14, paddingHorizontal: 28, borderRadius: 24, backgroundColor: "#4A4A4A", elevation: 4 },
   btnPressed: { backgroundColor: "#5a5a5a" },
   btnText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });
