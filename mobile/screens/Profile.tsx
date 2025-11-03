@@ -1,3 +1,5 @@
+
+
 import { useState, useEffect } from "react";
 import {
   ScrollView,
@@ -11,18 +13,17 @@ import {
 } from "react-native";
 import { Text as PaperText, TextInput, HelperText } from "react-native-paper";
 
-const bg = require("../assets/bg-screens.png"); // replace with your image
+const bg = require("../assets/bg-screens.png");
 
 type User = {
   username: string;
   email: string;
   mobileNumber: string;
-  dateOfBirth: string; // YYYY-MM-DD
+  dateOfBirth: string;
   doctorsEmail: string;
-  password: string; // required for update
 };
 
-const backendURL = "http://192.168.56.1:3000/ms-api/user"; // your backend
+const backendURL = "http://192.168.56.1:3000/ms-api/user";
 
 export default function Profile() {
   const { height } = useWindowDimensions();
@@ -34,7 +35,6 @@ export default function Profile() {
     mobileNumber: "",
     dateOfBirth: "",
     doctorsEmail: "",
-    password: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,20 +42,20 @@ export default function Profile() {
   const onChange = (k: keyof User, v: string) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
-  // Validations
+  //  Validations
   const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const validDoctor =
     form.doctorsEmail === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.doctorsEmail);
   const validDate = /^\d{4}-\d{2}-\d{2}$/.test(form.dateOfBirth);
-  const validMobile = form.mobileNumber.length <= 20;
-  const validPassword = form.password.trim().length > 0;
+  // const validMobile = form.mobileNumber.length <= 20;
+  const validMobile = /^\d{7,15}$/.test(form.mobileNumber);
 
-  const canSave =
-    validEmail && validDoctor && validDate && validMobile && validPassword && !saving;
 
-  // Fetch user data
+  const canSave = validEmail && validDoctor && validDate && validMobile && !saving;
+
+  //  Fetch user data
   useEffect(() => {
-    const username = "demo";//replrace with dynamic username (e.g., from auth)
+    const username = "demo"; // replace with dynamic username (from auth)
     fetch(`${backendURL}?username=${username}`)
       .then((res) => res.json())
       .then((data) => {
@@ -70,7 +70,6 @@ export default function Profile() {
           mobileNumber: data.MobileNumber,
           dateOfBirth: data.DateOfBirth ? data.DateOfBirth.split("T")[0] : "",
           doctorsEmail: data.DoctorsEmail,
-          password: "", // keep blank for security
         });
       })
       .catch((err) => {
@@ -80,19 +79,19 @@ export default function Profile() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Save user updates
+  //  Save user updates
   const save = async () => {
     if (!canSave) {
       Alert.alert("Validation", "Please fill all required fields correctly.");
       return;
     }
+
     setSaving(true);
     try {
       const res = await fetch(`${backendURL}?username=${form.username}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          Password: form.password, // required
           Email: form.email,
           MobileNumber: form.mobileNumber,
           DateOfBirth: form.dateOfBirth,
@@ -100,11 +99,11 @@ export default function Profile() {
         }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         Alert.alert("Success", "User updated successfully");
-        setForm((prev) => ({ ...prev, password: "" }));
       } else {
-        const data = await res.json();
         Alert.alert("Error", data.error || "Update failed");
       }
     } catch (err) {
@@ -163,7 +162,7 @@ export default function Profile() {
           left={<TextInput.Icon icon="phone" />}
         />
         <HelperText type={validMobile ? "info" : "error"} visible>
-          {validMobile ? " " : "Too long"}
+          {validMobile ? " " : "Phone between 7-15 digits "}
         </HelperText>
 
         <TextInput
@@ -194,20 +193,6 @@ export default function Profile() {
         />
         <HelperText type={validDoctor ? "info" : "error"} visible>
           {validDoctor ? " " : "Enter a valid email"}
-        </HelperText>
-
-        <TextInput
-          label="Password (required)"
-          value={form.password}
-          onChangeText={(t) => onChange("password", t)}
-          mode="outlined"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
-          secureTextEntry
-          left={<TextInput.Icon icon="lock" />}
-        />
-        <HelperText type={validPassword ? "info" : "error"} visible>
-          {validPassword ? " " : "Password is required"}
         </HelperText>
 
         <View style={{ height: 8 }} />
