@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -11,53 +11,113 @@ import {
 } from "react-native";
 import { Text as PaperText, TextInput, HelperText } from "react-native-paper";
 
-const bg = require("../assets/bg-screens.png"); // keep/change to your image
+const bg = require("../assets/bg-screens.png"); // replace with your image
 
 type User = {
   username: string;
   email: string;
   mobileNumber: string;
-  dateOfBirth: string;    // YYYY-MM-DD
+  dateOfBirth: string; // YYYY-MM-DD
   doctorsEmail: string;
+  password: string; // required for update
 };
 
-const INITIAL: User = {
-  username: "demo",
-  email: "demo@example.com",
-  mobileNumber: "9990001111",
-  dateOfBirth: "2000-01-01",
-  doctorsEmail: "doctor@example.com",
-};
+const backendURL = "http://192.168.56.1:3000/ms-api/user"; // your backend
 
 export default function Profile() {
   const { height } = useWindowDimensions();
-  const topPad = height * 0.05; // push everything 5% down
+  const topPad = height * 0.05;
 
-  const [form, setForm] = useState<User>(INITIAL);
+  const [form, setForm] = useState<User>({
+    username: "",
+    email: "",
+    mobileNumber: "",
+    dateOfBirth: "",
+    doctorsEmail: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const onChange = (k: keyof User, v: string) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
+  // Validations
   const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const validDoctor =
     form.doctorsEmail === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.doctorsEmail);
   const validDate = /^\d{4}-\d{2}-\d{2}$/.test(form.dateOfBirth);
   const validMobile = form.mobileNumber.length <= 20;
+  const validPassword = form.password.trim().length > 0;
 
-  const canSave = validEmail && validDoctor && validDate && validMobile && !saving;
+  const canSave =
+    validEmail && validDoctor && validDate && validMobile && validPassword && !saving;
 
+  // Fetch user data
+  useEffect(() => {
+    const username = "demo";//replrace with dynamic username (e.g., from auth)
+    fetch(`${backendURL}?username=${username}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          Alert.alert("Error", data.error);
+          return;
+        }
+
+        setForm({
+          username: data.username,
+          email: data.Email,
+          mobileNumber: data.MobileNumber,
+          dateOfBirth: data.DateOfBirth ? data.DateOfBirth.split("T")[0] : "",
+          doctorsEmail: data.DoctorsEmail,
+          password: "", // keep blank for security
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user:", err);
+        Alert.alert("Error", "Failed to fetch user data");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Save user updates
   const save = async () => {
+    if (!canSave) {
+      Alert.alert("Validation", "Please fill all required fields correctly.");
+      return;
+    }
     setSaving(true);
     try {
-      Alert.alert("Saved (mock)", "Wire this to your API later.");
-      console.log("Profile (mock save):", form);
+      const res = await fetch(`${backendURL}?username=${form.username}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Password: form.password, // required
+          Email: form.email,
+          MobileNumber: form.mobileNumber,
+          DateOfBirth: form.dateOfBirth,
+          DoctorsEmail: form.doctorsEmail,
+        }),
+      });
+
+      if (res.ok) {
+        Alert.alert("Success", "User updated successfully");
+        setForm((prev) => ({ ...prev, password: "" }));
+      } else {
+        const data = await res.json();
+        Alert.alert("Error", data.error || "Update failed");
+      }
+    } catch (err) {
+      console.error("Update failed:", err);
+      Alert.alert("Error", "Failed to update user");
     } finally {
       setSaving(false);
     }
   };
 
-return(
+  if (loading) return <Text>Loading...</Text>;
+
+  return (
     <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: topPad }]}
@@ -67,12 +127,11 @@ return(
           Profile
         </PaperText>
 
-        {/* Username — extra spacing below so it’s not tight with Email */}
         <TextInput
           label="Username"
           value={form.username}
           mode="outlined"
-          style={[styles.input, styles.usernameInput]}  // 👈 extra marginBottom
+          style={[styles.input, styles.usernameInput]}
           outlineStyle={styles.inputOutline}
           disabled
           left={<TextInput.Icon icon="account" />}
@@ -137,7 +196,20 @@ return(
           {validDoctor ? " " : "Enter a valid email"}
         </HelperText>
 
-        {/* Save button styled like Intro’s Get Started (same colors/radius/elevation) */}
+        <TextInput
+          label="Password (required)"
+          value={form.password}
+          onChangeText={(t) => onChange("password", t)}
+          mode="outlined"
+          style={styles.input}
+          outlineStyle={styles.inputOutline}
+          secureTextEntry
+          left={<TextInput.Icon icon="lock" />}
+        />
+        <HelperText type={validPassword ? "info" : "error"} visible>
+          {validPassword ? " " : "Password is required"}
+        </HelperText>
+
         <View style={{ height: 8 }} />
         <Pressable
           onPress={save}
@@ -159,29 +231,11 @@ return(
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.70)",
-  },
-  container: {
-    paddingHorizontal: 16,
-  },
-  title: {
-    marginBottom: 8,
-    fontWeight: "700",
-    color: "#2A2A2A",
-  },
-  input: {
-    backgroundColor: "#FFFFFFE6",
-  },
-  usernameInput: {
-    marginBottom: 28, // 👈 extra gap between Username and Email
-  },
-  inputOutline: {
-    borderRadius: 16,
-  },
-
-  // Match Intro button styles (color, radius, shadow); position stays inline here
+  container: { paddingHorizontal: 16 },
+  title: { marginBottom: 8, fontWeight: "700", color: "#2A2A2A" },
+  input: { backgroundColor: "#FFFFFFE6" },
+  usernameInput: { marginBottom: 28 },
+  inputOutline: { borderRadius: 16 },
   ctaBtn: {
     alignSelf: "center",
     marginTop: 16,
@@ -189,8 +243,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     borderRadius: 24,
     backgroundColor: "#4A4A4A",
-    elevation: 4, // Android shadow
-    // web/iOS soft shadow
+    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
