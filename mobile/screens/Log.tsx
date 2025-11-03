@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Button, TextInput, HelperText, Text } from "react-native-paper";
 import { listSymptoms, createLog, createRating } from "../lib/api";
