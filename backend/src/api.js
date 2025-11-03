@@ -74,18 +74,36 @@ router.get("/dates", async (req, res) => {
 
 // ---------------- USERS API ----------------
 
-// GET /ms-api/user?username=demo
+
+
+
 router.get("/user", async (req, res) => {
   const { username } = req.query;
   if (!username) return res.status(400).json({ error: "username required" });
+
   try {
-    const [rows] = await pool.query("SELECT username, Password, Email, MobileNumber, DateOfBirth, DoctorsEmail FROM users WHERE username = ?", [username]);
+    const [rows] = await pool.query(
+      "SELECT username, Password, Email, MobileNumber, DateOfBirth, DoctorsEmail FROM users WHERE username = ?",
+      [username]
+    );
+
     if (rows.length === 0) return res.status(404).json({ error: "User not found" });
-    res.json(rows[0]);
+
+    const user = rows[0];
+
+    // date format
+    if (user.DateOfBirth) {
+      user.DateOfBirth = user.DateOfBirth.toISOString().split('T')[0]; // YYYY-MM-DD
+    }
+
+    
+    res.json(user);
+
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
 
 // PUT /ms-api/user?username=demo
 router.put("/user", async (req, res) => {
