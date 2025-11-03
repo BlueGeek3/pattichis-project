@@ -9,6 +9,16 @@ export default function History() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => { listHistory(USER).then(setItems).catch(console.error); }, []);
 
+  items.map((i)=>(
+  i.date=new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Nicosia', // 🇨🇾 Cyprus timezone
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+}).format(new Date(i.date))));
+  
+  
+ 
   return (
     <FlatList
       contentContainerStyle={{ padding: 8 }}
