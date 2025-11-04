@@ -1,5 +1,6 @@
-// mobile/screens/Profile.tsx
-import { useState } from "react";
+
+
+import { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -12,51 +13,108 @@ import {
 } from "react-native";
 import { Text as PaperText, TextInput, HelperText } from "react-native-paper";
 
-const bg = require("../assets/bg-screens.png"); // keep/change to your image
+const bg = require("../assets/bg-screens.png");
 
 type User = {
   username: string;
   email: string;
   mobileNumber: string;
-  dateOfBirth: string;    // YYYY-MM-DD
+  dateOfBirth: string;
   doctorsEmail: string;
 };
 
-const INITIAL: User = {
-  username: "demo",
-  email: "demo@example.com",
-  mobileNumber: "9990001111",
-  dateOfBirth: "2000-01-01",
-  doctorsEmail: "doctor@example.com",
-};
+const backendURL = "http://192.168.56.1:3000/ms-api/user";
 
 export default function Profile() {
   const { height } = useWindowDimensions();
-  const topPad = height * 0.05; // push everything 5% down
+  const topPad = height * 0.05;
 
-  const [form, setForm] = useState<User>(INITIAL);
+  const [form, setForm] = useState<User>({
+    username: "",
+    email: "",
+    mobileNumber: "",
+    dateOfBirth: "",
+    doctorsEmail: "",
+  });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const onChange = (k: keyof User, v: string) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
+  //  Validations
   const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const validDoctor =
     form.doctorsEmail === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.doctorsEmail);
   const validDate = /^\d{4}-\d{2}-\d{2}$/.test(form.dateOfBirth);
-  const validMobile = form.mobileNumber.length <= 20;
+  // const validMobile = form.mobileNumber.length <= 20;
+  const validMobile = /^\d{7,15}$/.test(form.mobileNumber);
+
 
   const canSave = validEmail && validDoctor && validDate && validMobile && !saving;
 
+  //  Fetch user data
+  useEffect(() => {
+    const username = "demo"; // replace with dynamic username (from auth)
+    fetch(`${backendURL}?username=${username}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          Alert.alert("Error", data.error);
+          return;
+        }
+
+        setForm({
+          username: data.username,
+          email: data.Email,
+          mobileNumber: data.MobileNumber,
+          dateOfBirth: data.DateOfBirth ? data.DateOfBirth.split("T")[0] : "",
+          doctorsEmail: data.DoctorsEmail,
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user:", err);
+        Alert.alert("Error", "Failed to fetch user data");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  //  Save user updates
   const save = async () => {
+    if (!canSave) {
+      Alert.alert("Validation", "Please fill all required fields correctly.");
+      return;
+    }
+
     setSaving(true);
     try {
-      Alert.alert("Saved (mock)", "Wire this to your API later.");
-      console.log("Profile (mock save):", form);
+      const res = await fetch(`${backendURL}?username=${form.username}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Email: form.email,
+          MobileNumber: form.mobileNumber,
+          DateOfBirth: form.dateOfBirth,
+          DoctorsEmail: form.doctorsEmail,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        Alert.alert("Success", "User updated successfully");
+      } else {
+        Alert.alert("Error", data.error || "Update failed");
+      }
+    } catch (err) {
+      console.error("Update failed:", err);
+      Alert.alert("Error", "Failed to update user");
     } finally {
       setSaving(false);
     }
   };
+
+  if (loading) return <Text>Loading...</Text>;
 
   return (
     <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
@@ -68,12 +126,11 @@ export default function Profile() {
           Profile
         </PaperText>
 
-        {/* Username — extra spacing below so it’s not tight with Email */}
         <TextInput
           label="Username"
           value={form.username}
           mode="outlined"
-          style={[styles.input, styles.usernameInput]}  // 👈 extra marginBottom
+          style={[styles.input, styles.usernameInput]}
           outlineStyle={styles.inputOutline}
           disabled
           left={<TextInput.Icon icon="account" />}
@@ -105,7 +162,7 @@ export default function Profile() {
           left={<TextInput.Icon icon="phone" />}
         />
         <HelperText type={validMobile ? "info" : "error"} visible>
-          {validMobile ? " " : "Too long"}
+          {validMobile ? " " : "Phone between 7-15 digits "}
         </HelperText>
 
         <TextInput
@@ -138,7 +195,6 @@ export default function Profile() {
           {validDoctor ? " " : "Enter a valid email"}
         </HelperText>
 
-        {/* Save button styled like Intro’s Get Started (same colors/radius/elevation) */}
         <View style={{ height: 8 }} />
         <Pressable
           onPress={save}
@@ -160,29 +216,11 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.70)",
-  },
-  container: {
-    paddingHorizontal: 16,
-  },
-  title: {
-    marginBottom: 8,
-    fontWeight: "700",
-    color: "#2A2A2A",
-  },
-  input: {
-    backgroundColor: "#FFFFFFE6",
-  },
-  usernameInput: {
-    marginBottom: 28, // 👈 extra gap between Username and Email
-  },
-  inputOutline: {
-    borderRadius: 16,
-  },
-
-  // Match Intro button styles (color, radius, shadow); position stays inline here
+  container: { paddingHorizontal: 16 },
+  title: { marginBottom: 8, fontWeight: "700", color: "#2A2A2A" },
+  input: { backgroundColor: "#FFFFFFE6" },
+  usernameInput: { marginBottom: 28 },
+  inputOutline: { borderRadius: 16 },
   ctaBtn: {
     alignSelf: "center",
     marginTop: 16,
@@ -190,8 +228,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     borderRadius: 24,
     backgroundColor: "#4A4A4A",
-    elevation: 4, // Android shadow
-    // web/iOS soft shadow
+    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
@@ -202,4 +239,3 @@ const styles = StyleSheet.create({
   ctaBtnPressed: { backgroundColor: "#5a5a5a" },
   ctaBtnText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });
-
