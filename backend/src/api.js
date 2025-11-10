@@ -160,7 +160,7 @@ router.post("/rating", async (req, res) => {
     res.status(500).json({ error: err.message || String(err) });
   }
 });
-// USER API MARIA
+// USER API  FOR PROFILE
 // GET /ms-api/user?username=demo
 // ============================
 router.get("/user", async (req, res) => {
