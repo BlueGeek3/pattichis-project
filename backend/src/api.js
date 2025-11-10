@@ -1,131 +1,164 @@
-import { Router } from "express";
+// backend/src/api.js
+import express from "express";
 import { pool } from "./db.js";
 
-const router = Router();
+const router = express.Router();
 
-// GET /ms-api/symptoms
-router.get("/symptoms", async (req, res) => {
+async function q(sql, params) {
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+
+/**
+ * Health check
+ * GET /ms-api/health
+ */
+router.get("/health", async (_req, res) => {
   try {
-    const [rows] = await pool.query("SELECT ID as id, name FROM symptoms ORDER BY ID");
-    res.json(rows);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    await pool.query("SELECT 1");
+    res.json({ status: "ok" });
+  } catch (err) {
+    console.error("health error:", err);
+    res.status(500).json({ status: "error", error: String(err.message || err) });
+  }
 });
 
-// GET /ms-api/history?username=demo
+/**
+ * List symptoms
+ * GET /ms-api/symptoms
+ */
+router.get("/symptoms", async (_req, res) => {
+  try {
+    const rows = await q(
+      "SELECT ID AS id, name FROM symptoms ORDER BY ID ASC"
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("symptoms error:", err);
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
+
+/**
+ * History entries for a user
+ * GET /ms-api/history?username=demo
+ * Uses:
+ *   symptomshistorylog(username,date,hours,painScore,ID,symptomId)
+ *   symptoms(ID,name)
+ */
 router.get("/history", async (req, res) => {
   const { username } = req.query;
-  if (!username) return res.status(400).json({ error: "username required" });
+  if (!username) {
+    return res.status(400).json({ error: "username required" });
+  }
+
   try {
-    const [rows] = await pool.query(
-      `SELECT h.ID as id, h.date, h.hours, h.painScore, h.symptomId, s.name as symptomName
-       FROM symptomshistorylog h
-       JOIN symptoms s ON s.ID = h.symptomId
-       WHERE h.username = ?
-       ORDER BY h.date DESC, h.ID DESC`, [username]
+    const rows = await q(
+      `SELECT
+         shl.ID          AS id,
+         shl.date        AS date,
+         shl.hours       AS hours,
+         shl.painScore   AS painScore,
+         s.name          AS symptomName
+       FROM symptomshistorylog shl
+       JOIN symptoms s ON shl.symptomId = s.ID
+       WHERE shl.username = ?
+       ORDER BY shl.date DESC, shl.ID DESC`,
+      [username]
     );
     res.json(rows);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// POST /ms-api/log
-router.post("/log", async (req, res) => {
-  const { username, date, hours, painScore, symptomId } = req.body || {};
-  for (const k of ["username","date","hours","painScore","symptomId"]) {
-    if (req.body?.[k] === undefined) return res.status(400).json({ error: `missing ${k}` });
+  } catch (err) {
+    console.error("history error:", err);
+    res.status(500).json({ error: err.message || String(err) });
   }
-  try {
-    const [r] = await pool.query(
-      `INSERT INTO symptomshistorylog (username, date, hours, painScore, symptomId)
-       VALUES (?,?,?,?,?)`,
-      [username, date, hours, painScore, symptomId]
-    );
-    res.json({ ok: true, id: r.insertId });
-  } catch (e) { res.status(400).json({ ok:false, error: e.message }); }
 });
 
-// POST /ms-api/rating
-router.post("/rating", async (req, res) => {
-  const { username, date, rating } = req.body || {};
-  for (const k of ["username","date","rating"]) {
-    if (req.body?.[k] === undefined) return res.status(400).json({ error: `missing ${k}` });
-  }
-  try {
-    const [r] = await pool.query(
-      `INSERT INTO dailyrating (Username, Date, Rating) VALUES (?,?,?)`,
-      [username, date, rating]
-    );
-    res.json({ ok: true, daily_id: r.insertId });
-  } catch (e) { res.status(400).json({ ok:false, error: e.message }); }
-});
-
-// GET /ms-api/dates?username=demo
+/**
+ * Distinct dates that have logs for a user
+ * GET /ms-api/dates?username=demo
+ */
 router.get("/dates", async (req, res) => {
   const { username } = req.query;
-  if (!username) return res.status(400).json({ error: "username required" });
+  if (!username) {
+    return res.status(400).json({ error: "username required" });
+  }
+
   try {
-    const [rows] = await pool.query(
-      "SELECT DISTINCT date FROM symptomshistorylog WHERE username=? ORDER BY date DESC",
+    const rows = await q(
+      `SELECT DISTINCT DATE_FORMAT(date, '%Y-%m-%d') AS date
+       FROM symptomshistorylog
+       WHERE username = ?
+       ORDER BY date DESC`,
       [username]
     );
     res.json(rows.map(r => r.date));
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// ---------------- USERS API ----------------
-
-
-
-
-router.get("/user", async (req, res) => {
-  const { username } = req.query;
-  if (!username) return res.status(400).json({ error: "username required" });
-
-  try {
-    const [rows] = await pool.query(
-      "SELECT username, Password, Email, MobileNumber, DateOfBirth, DoctorsEmail FROM users WHERE username = ?",
-      [username]
-    );
-
-    if (rows.length === 0) return res.status(404).json({ error: "User not found" });
-
-    const user = rows[0];
-
-    // date format
-    if (user.DateOfBirth) {
-      user.DateOfBirth = user.DateOfBirth.toISOString().split('T')[0]; // YYYY-MM-DD
-    }
-
-    
-    res.json(user);
-
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  } catch (err) {
+    console.error("dates error:", err);
+    res.status(500).json({ error: err.message || String(err) });
   }
 });
 
+/**
+ * Create a symptom log
+ * POST /ms-api/log
+ * body: { username, date, hours, painScore, symptomId }
+ */
+router.post("/log", async (req, res) => {
+  const { username, date, hours, painScore, symptomId } = req.body || {};
 
-// PUT /ms-api/user?username=demo
-router.put("/user", async (req, res) => {
-  const { username } = req.query;
-  const { Password, Email, MobileNumber, DateOfBirth, DoctorsEmail } = req.body;
-  if (!username) return res.status(400).json({ error: "username required" });
+  if (!username || !date || !symptomId) {
+    return res
+      .status(400)
+      .json({ error: "username, date and symptomId are required" });
+  }
 
   try {
     const [result] = await pool.query(
-      `UPDATE users 
-       SET Password = ?, Email = ?, MobileNumber = ?, DateOfBirth = ?, DoctorsEmail = ?
-       WHERE username = ?`,
-      [Password, Email, MobileNumber, DateOfBirth, DoctorsEmail, username]
+      `INSERT INTO symptomshistorylog
+         (username, date, hours, painScore, symptomId)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        username,
+        date,
+        hours ?? 0,
+        painScore ?? 0,
+        symptomId,
+      ]
     );
 
-    if (result.affectedRows === 0)
-      return res.status(404).json({ error: "User not found" });
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.json({ ok: true, id: result.insertId });
+  } catch (err) {
+    console.error("log error:", err);
+    res.status(500).json({ error: err.message || String(err) });
   }
 });
 
+/**
+ * Create a daily rating
+ * POST /ms-api/rating
+ * body: { username, date, rating }
+ */
+router.post("/rating", async (req, res) => {
+  const { username, date, rating } = req.body || {};
+
+  if (!username || !date || rating == null) {
+    return res
+      .status(400)
+      .json({ error: "username, date and rating are required" });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `INSERT INTO dailyrating (Username, Date, Rating)
+       VALUES (?, ?, ?)`,
+      [username, date, rating]
+    );
+
+    res.json({ ok: true, daily_id: result.insertId });
+  } catch (err) {
+    console.error("rating error:", err);
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
 
 export default router;
