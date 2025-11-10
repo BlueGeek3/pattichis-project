@@ -1,4 +1,7 @@
 
+//import { BACKEND_URL } from "@env";
+//const backendURL = BACKEND_URL;
+
 
 import { useState, useEffect } from "react";
 import {

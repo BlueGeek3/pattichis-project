@@ -160,5 +160,61 @@ router.post("/rating", async (req, res) => {
     res.status(500).json({ error: err.message || String(err) });
   }
 });
+// USER API MARIA
+// GET /ms-api/user?username=demo
+// ============================
+router.get("/user", async (req, res) => {
+  const { username } = req.query;
+  if (!username) return res.status(400).json({ error: "username required" });
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT username, Password, Email, MobileNumber, DateOfBirth, DoctorsEmail FROM users WHERE username = ?",
+      [username]
+    );
+
+    if (rows.length === 0)
+      return res.status(404).json({ error: "User not found" });
+
+    const user = rows[0];
+
+    // format date (YYYY-MM-DD)
+    if (user.DateOfBirth instanceof Date) {
+      user.DateOfBirth = user.DateOfBirth.toISOString().split("T")[0];
+    }
+
+    res.json(user);
+  } catch (e) {
+    console.error("Error fetching user:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================
+// PUT /ms-api/user?username=demo
+// ============================
+router.put("/user", async (req, res) => {
+  const { username } = req.query;
+  const { Password, Email, MobileNumber, DateOfBirth, DoctorsEmail } = req.body;
+
+  if (!username) return res.status(400).json({ error: "username required" });
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE users 
+       SET Password = ?, Email = ?, MobileNumber = ?, DateOfBirth = ?, DoctorsEmail = ?
+       WHERE username = ?`,
+      [Password, Email, MobileNumber, DateOfBirth, DoctorsEmail, username]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "User not found" });
+
+    res.json({ ok: true, message: "User updated successfully" });
+  } catch (e) {
+    console.error("Error updating user:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
 
 export default router;
