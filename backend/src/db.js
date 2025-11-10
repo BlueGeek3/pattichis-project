@@ -18,6 +18,8 @@ export const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   charset: "utf8mb4_general_ci",
+    timezone: "Z", // or '+00:00'
+  dateStrings: true
 });
 
 export async function query(sql, params) {
