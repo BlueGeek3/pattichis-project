@@ -1,5 +1,5 @@
 // mobile/screens/History.tsx
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ImageBackground,
   StyleSheet,
@@ -8,9 +8,16 @@ import {
   Pressable,
   Text,
   FlatList,
-  type ListRenderItem,
 } from "react-native";
-import { ActivityIndicator, HelperText, List, Text as PaperText } from "react-native-paper";
+import {
+  ActivityIndicator,
+  HelperText,
+  List,
+  Text as PaperText,
+  Portal,
+  Dialog,
+  Button,
+} from "react-native-paper";
 import { Calendar, type DateData } from "react-native-calendars";
 import { listHistory } from "../lib/api";
 
@@ -35,105 +42,82 @@ export default function History() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
 
-  // Load data
-  useEffect(() => {
-    (async () => {
-      try {
-        setErr(null);
-        setLoading(true);
-        const raw = await listHistory(USER);
-
-        const formatted: HistoryItem[] = (raw || []).map((i: any) => {
-          const d = new Date(i.date);
-          const dateKey = d.toISOString().slice(0, 10); // YYYY-MM-DD
-          const date = new Intl.DateTimeFormat("en-GB", {
-            timeZone: "Europe/Nicosia",
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          }).format(d); // DD/MM/YYYY
-          return {
-            id: Number(i.id),
-            dateKey,
-            date,
-            symptomName: String(i.symptomName ?? ""),
-            painScore: Number(i.painScore ?? 0),
-            hours: Number(i.hours ?? 0),
-          };
-        });
-
-        setItems(formatted);
-      } catch (e: any) {
-        setErr(e?.message || "Network request failed");
-        setItems([]);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  // Calendar marks
-  const marked = useMemo(() => {
-    const out: Record<string, { marked?: boolean; selected?: boolean }> = {};
-    for (const it of items) out[it.dateKey] = { ...(out[it.dateKey] || {}), marked: true };
-    if (selected) out[selected] = { ...(out[selected] || {}), selected: true };
-    return out;
-  }, [items, selected]);
-
-  // List filtering by selected date (if any)
-  const displayItems = useMemo(
-    () => (selected ? items.filter((i) => i.dateKey === selected) : items),
-    [items, selected]
-  );
-
-  const onDayPress = (d: DateData) => setSelected(d.dateString);
-
-  // Typed, memoized row renderer
-  const renderItem: ListRenderItem<HistoryItem> = useCallback(
-    ({ item }) => (
-      <List.Item
-        style={styles.listItem}
-        title={`${item.date} — ${item.symptomName}`}
-        description={`Pain ${item.painScore}/10 • Hours ${item.hours}`}
-        left={(p) => <List.Icon {...p} icon="calendar" />}
-      />
-    ),
-    []
-  );
-
-  const retry = async () => {
+  // ---- Load data ---------------------------------------------------------
+  const load = async () => {
     try {
       setErr(null);
       setLoading(true);
       const raw = await listHistory(USER);
+
       const formatted: HistoryItem[] = (raw || []).map((i: any) => {
-        const d = new Date(i.date);
-        const dateKey = d.toISOString().slice(0, 10);
-        const date = new Intl.DateTimeFormat("en-GB", {
-          timeZone: "Europe/Nicosia",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }).format(d);
+        // i.date comes from MySQL DATE; avoid timezone shifts by treating as plain string
+        const rawDate =
+          typeof i.date === "string"
+            ? i.date.slice(0, 10) // "YYYY-MM-DD..."
+            : new Date(i.date).toISOString().slice(0, 10);
+
+        const [y, m, d] = rawDate.split("-");
+        const pretty = `${d}/${m}/${y}`;
+
         return {
           id: Number(i.id),
-          dateKey,
-          date,
+          dateKey: rawDate, // used by calendar & filtering
+          date: pretty, // shown to user
           symptomName: String(i.symptomName ?? ""),
           painScore: Number(i.painScore ?? 0),
           hours: Number(i.hours ?? 0),
         };
       });
+
       setItems(formatted);
     } catch (e: any) {
+      console.error("history load error:", e);
       setErr(e?.message || "Network request failed");
+      setItems([]);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    load();
+  }, []);
+
+  // ---- Calendar marks ----------------------------------------------------
+  const marked = useMemo(() => {
+    const out: Record<string, { marked?: boolean; selected?: boolean }> = {};
+    for (const it of items) {
+      out[it.dateKey] = { ...(out[it.dateKey] || {}), marked: true };
+    }
+    if (selectedDate) {
+      out[selectedDate] = { ...(out[selectedDate] || {}), selected: true };
+    }
+    return out;
+  }, [items, selectedDate]);
+
+  // ---- Filtered list for selected date -----------------------------------
+  const displayItems = useMemo(
+    () =>
+      selectedDate
+        ? items.filter((i) => i.dateKey === selectedDate)
+        : items,
+    [items, selectedDate]
+  );
+
+  const onDayPress = (d: DateData) => {
+    // Toggle if same day tapped again
+    setSelectedDate((prev) => (prev === d.dateString ? null : d.dateString));
+  };
+
+  // ---- Retry button handler ----------------------------------------------
+  const onRetry = () => {
+    load();
+  };
+
+  // ---- Render ------------------------------------------------------------
   return (
     <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
       <View style={[styles.container, { paddingTop: topPad }]}>
@@ -153,12 +137,19 @@ export default function History() {
                 <HelperText type="error" visible>
                   {err}
                 </HelperText>
-                <Pressable onPress={retry} style={({ pressed }) => [styles.ctaBtn, pressed && styles.ctaBtnPressed]}>
+                <Pressable
+                  onPress={onRetry}
+                  style={({ pressed }) => [
+                    styles.ctaBtn,
+                    pressed && styles.ctaBtnPressed,
+                  ]}
+                >
                   <Text style={styles.ctaBtnText}>Retry</Text>
                 </Pressable>
               </>
             ) : null}
 
+            {/* Calendar */}
             <View style={styles.calendarCard}>
               <Calendar
                 onDayPress={onDayPress}
@@ -173,18 +164,78 @@ export default function History() {
               />
             </View>
 
+            {/* History list */}
             <FlatList
               contentContainerStyle={{ padding: 8, paddingBottom: 16 }}
               data={displayItems}
               keyExtractor={(i) => String(i.id)}
-              ListEmptyComponent={<PaperText style={{ padding: 16 }}>No logs yet.</PaperText>}
-              renderItem={renderItem}
+              ListEmptyComponent={
+                <PaperText style={{ padding: 16 }}>
+                  No logs yet.
+                </PaperText>
+              }
+              renderItem={({ item }) => (
+                <Pressable onPress={() => setSelectedItem(item)}>
+                  <View style={styles.logCard}>
+                    <View style={styles.logHeaderRow}>
+                      <PaperText style={styles.logSymptom}>
+                        {item.symptomName || "Symptom"}
+                      </PaperText>
+                      <PaperText style={styles.logPain}>
+                        Pain {item.painScore}/10
+                      </PaperText>
+                    </View>
+                    <PaperText style={styles.logMeta}>
+                      {item.date} • Hours: {item.hours}
+                    </PaperText>
+                  </View>
+                </Pressable>
+              )}
               initialNumToRender={12}
               removeClippedSubviews
             />
           </>
         )}
       </View>
+
+      {/* Detail popup */}
+      <Portal>
+        <Dialog
+          visible={!!selectedItem}
+          onDismiss={() => setSelectedItem(null)}
+        >
+          {selectedItem && (
+            <>
+              <Dialog.Title>{selectedItem.symptomName}</Dialog.Title>
+              <Dialog.Content>
+                <PaperText>Date: {selectedItem.date}</PaperText>
+                <PaperText>Hours: {selectedItem.hours}</PaperText>
+                <PaperText style={{ marginTop: 8 }}>
+                  Pain score: {selectedItem.painScore}/10
+                </PaperText>
+                <View style={styles.painBarWrapper}>
+                  <View
+                    style={[
+                      styles.painBarFill,
+                      {
+                        width: `${
+                          Math.max(
+                            0,
+                            Math.min(10, selectedItem.painScore)
+                          ) * 10
+                        }%`,
+                      },
+                    ]}
+                  />
+                </View>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={() => setSelectedItem(null)}>Close</Button>
+              </Dialog.Actions>
+            </>
+          )}
+        </Dialog>
+      </Portal>
     </ImageBackground>
   );
 }
@@ -192,7 +243,12 @@ export default function History() {
 const styles = StyleSheet.create({
   bg: { flex: 1 },
   container: { flex: 1, paddingHorizontal: 16 },
-  title: { marginBottom: 8, fontWeight: "700", color: "#2A2A2A" },
+  title: {
+    marginBottom: 8,
+    fontWeight: "700",
+    color: "#2A2A2A",
+  },
+
   calendarCard: {
     marginTop: 8,
     marginBottom: 12,
@@ -205,12 +261,48 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  listItem: {
+
+  // List item styling
+  logCard: {
     backgroundColor: "#FFFFFFE6",
-    borderRadius: 12,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     marginVertical: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  center: { alignItems: "center", justifyContent: "center", paddingVertical: 24 },
+  logHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+  },
+  logSymptom: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2A2A2A",
+  },
+  logPain: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#b3261e",
+  },
+  logMeta: {
+    marginTop: 2,
+    fontSize: 12,
+    color: "#555",
+  },
+
+  center: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 24,
+  },
+
+  // Shared CTA button (Retry)
   ctaBtn: {
     alignSelf: "center",
     marginVertical: 8,
@@ -228,4 +320,18 @@ const styles = StyleSheet.create({
   },
   ctaBtnPressed: { backgroundColor: "#5a5a5a" },
   ctaBtnText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+
+  // Pain bar in dialog
+  painBarWrapper: {
+    marginTop: 6,
+    height: 10,
+    borderRadius: 6,
+    backgroundColor: "#eee",
+    overflow: "hidden",
+  },
+  painBarFill: {
+    height: "100%",
+    borderRadius: 6,
+    backgroundColor: "#b3261e",
+  },
 });

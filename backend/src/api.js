@@ -4,6 +4,7 @@ import { pool } from "./db.js";
 
 const router = express.Router();
 
+// Small helper for SELECTs
 async function q(sql, params) {
   const [rows] = await pool.query(sql, params);
   return rows;
@@ -19,13 +20,17 @@ router.get("/health", async (_req, res) => {
     res.json({ status: "ok" });
   } catch (err) {
     console.error("health error:", err);
-    res.status(500).json({ status: "error", error: String(err.message || err) });
+    res.status(500).json({
+      status: "error",
+      error: String(err.message || err),
+    });
   }
 });
 
 /**
  * GET one user
  * GET /ms-api/user?username=demo
+ * Returns: { username, Email, MobileNumber, DateOfBirth, DoctorsEmail }
  */
 router.get("/user", async (req, res) => {
   const { username } = req.query;
@@ -52,7 +57,7 @@ router.get("/user", async (req, res) => {
 
     const user = rows[0];
 
-    // format DateOfBirth -> YYYY-MM-DD string for the client
+    // Normalize DateOfBirth to YYYY-MM-DD string (if it's a Date object)
     if (user.DateOfBirth instanceof Date) {
       user.DateOfBirth = user.DateOfBirth.toISOString().split("T")[0];
     }
@@ -67,7 +72,7 @@ router.get("/user", async (req, res) => {
 /**
  * Update user
  * PUT /ms-api/user?username=demo
- * body: { Email, MobileNumber, DateOfBirth, DoctorsEmail }
+ * Body: { Email, MobileNumber, DateOfBirth, DoctorsEmail }
  */
 router.put("/user", async (req, res) => {
   const { username } = req.query;
@@ -102,6 +107,7 @@ router.put("/user", async (req, res) => {
 /**
  * List symptoms
  * GET /ms-api/symptoms
+ * Returns: [{ id, name }]
  */
 router.get("/symptoms", async (_req, res) => {
   try {
@@ -121,6 +127,7 @@ router.get("/symptoms", async (_req, res) => {
  * Uses:
  *   symptomshistorylog(username,date,hours,painScore,ID,symptomId)
  *   symptoms(ID,name)
+ * Returns: [{ id, date, hours, painScore, symptomName }]
  */
 router.get("/history", async (req, res) => {
   const { username } = req.query;
@@ -152,6 +159,7 @@ router.get("/history", async (req, res) => {
 /**
  * Distinct dates that have logs for a user
  * GET /ms-api/dates?username=demo
+ * Returns: ["YYYY-MM-DD", ...]
  */
 router.get("/dates", async (req, res) => {
   const { username } = req.query;
@@ -228,62 +236,6 @@ router.post("/rating", async (req, res) => {
   } catch (err) {
     console.error("rating error:", err);
     res.status(500).json({ error: err.message || String(err) });
-  }
-});
-// USER API  FOR PROFILE
-// GET /ms-api/user?username=demo
-// ============================
-router.get("/user", async (req, res) => {
-  const { username } = req.query;
-  if (!username) return res.status(400).json({ error: "username required" });
-
-  try {
-    const [rows] = await pool.query(
-      "SELECT username, Password, Email, MobileNumber, DateOfBirth, DoctorsEmail FROM users WHERE username = ?",
-      [username]
-    );
-
-    if (rows.length === 0)
-      return res.status(404).json({ error: "User not found" });
-
-    const user = rows[0];
-
-    // format date (YYYY-MM-DD)
-    if (user.DateOfBirth instanceof Date) {
-      user.DateOfBirth = user.DateOfBirth.toISOString().split("T")[0];
-    }
-
-    res.json(user);
-  } catch (e) {
-    console.error("Error fetching user:", e);
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// ============================
-// PUT /ms-api/user?username=demo
-// ============================
-router.put("/user", async (req, res) => {
-  const { username } = req.query;
-  const { Password, Email, MobileNumber, DateOfBirth, DoctorsEmail } = req.body;
-
-  if (!username) return res.status(400).json({ error: "username required" });
-
-  try {
-    const [result] = await pool.query(
-      `UPDATE users 
-       SET Password = ?, Email = ?, MobileNumber = ?, DateOfBirth = ?, DoctorsEmail = ?
-       WHERE username = ?`,
-      [Password, Email, MobileNumber, DateOfBirth, DoctorsEmail, username]
-    );
-
-    if (result.affectedRows === 0)
-      return res.status(404).json({ error: "User not found" });
-
-    res.json({ ok: true, message: "User updated successfully" });
-  } catch (e) {
-    console.error("Error updating user:", e);
-    res.status(500).json({ error: e.message });
   }
 });
 
