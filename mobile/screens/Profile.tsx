@@ -1,5 +1,4 @@
-
-
+// mobile/screens/Profile.tsx
 import { useState, useEffect } from "react";
 import {
   ScrollView,
@@ -12,6 +11,7 @@ import {
   Text,
 } from "react-native";
 import { Text as PaperText, TextInput, HelperText } from "react-native-paper";
+import { BASE } from "../lib/api";
 
 const bg = require("../assets/bg-screens.png");
 
@@ -23,7 +23,8 @@ type User = {
   doctorsEmail: string;
 };
 
-const backendURL = "http://192.168.56.1:3000/ms-api/user";
+// Use shared BASE so it works the same as other screens
+const USER_ENDPOINT = `${BASE}/user`;
 
 export default function Profile() {
   const { height } = useWindowDimensions();
@@ -42,66 +43,79 @@ export default function Profile() {
   const onChange = (k: keyof User, v: string) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
-  //  Validations
+  // --- validations ---
   const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
   const validDoctor =
-    form.doctorsEmail === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.doctorsEmail);
+    form.doctorsEmail === "" ||
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.doctorsEmail);
   const validDate = /^\d{4}-\d{2}-\d{2}$/.test(form.dateOfBirth);
-  // const validMobile = form.mobileNumber.length <= 20;
   const validMobile = /^\d{7,15}$/.test(form.mobileNumber);
 
+  const canSave =
+    validEmail && validDoctor && validDate && validMobile && !saving;
 
-  const canSave = validEmail && validDoctor && validDate && validMobile && !saving;
-
-  //  Fetch user data
+  // --- fetch user data (demo user for now) ---
   useEffect(() => {
-    const username = "demo"; // replace with dynamic username (from auth)
-    fetch(`${backendURL}?username=${username}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          Alert.alert("Error", data.error);
+    const username = "demo"; // TODO: replace with auth user
+
+    (async () => {
+      try {
+        const res = await fetch(`${USER_ENDPOINT}?username=${username}`);
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          console.error("Fetch user error:", data.error || res.statusText);
+          Alert.alert("Error", data.error || "Failed to fetch user data");
           return;
         }
 
         setForm({
           username: data.username,
           email: data.Email,
-          mobileNumber: data.MobileNumber,
-          dateOfBirth: data.DateOfBirth ? data.DateOfBirth.split("T")[0] : "",
-          doctorsEmail: data.DoctorsEmail,
+          mobileNumber: String(data.MobileNumber ?? ""),
+          dateOfBirth: data.DateOfBirth
+            ? String(data.DateOfBirth).split("T")[0]
+            : "",
+          doctorsEmail: data.DoctorsEmail ?? "",
         });
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to fetch user:", err);
         Alert.alert("Error", "Failed to fetch user data");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  //  Save user updates
+  // --- save user updates ---
   const save = async () => {
     if (!canSave) {
-      Alert.alert("Validation", "Please fill all required fields correctly.");
+      Alert.alert(
+        "Validation",
+        "Please fill all required fields correctly."
+      );
       return;
     }
 
     setSaving(true);
     try {
-      const res = await fetch(`${backendURL}?username=${form.username}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          Email: form.email,
-          MobileNumber: form.mobileNumber,
-          DateOfBirth: form.dateOfBirth,
-          DoctorsEmail: form.doctorsEmail,
-        }),
-      });
+      const res = await fetch(
+        `${USER_ENDPOINT}?username=${encodeURIComponent(form.username)}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            Email: form.email,
+            MobileNumber: form.mobileNumber,
+            DateOfBirth: form.dateOfBirth,
+            DoctorsEmail: form.doctorsEmail,
+          }),
+        }
+      );
 
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && !data.error) {
         Alert.alert("Success", "User updated successfully");
       } else {
         Alert.alert("Error", data.error || "Update failed");
@@ -114,7 +128,20 @@ export default function Profile() {
     }
   };
 
-  if (loading) return <Text>Loading...</Text>;
+  if (loading) {
+    return (
+      <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
+        <View
+          style={[
+            styles.container,
+            { paddingTop: topPad, alignItems: "center" },
+          ]}
+        >
+          <Text>Loading...</Text>
+        </View>
+      </ImageBackground>
+    );
+  }
 
   return (
     <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
@@ -162,7 +189,7 @@ export default function Profile() {
           left={<TextInput.Icon icon="phone" />}
         />
         <HelperText type={validMobile ? "info" : "error"} visible>
-          {validMobile ? " " : "Phone between 7-15 digits "}
+          {validMobile ? " " : "Phone between 7-15 digits" }
         </HelperText>
 
         <TextInput
@@ -205,7 +232,9 @@ export default function Profile() {
             !canSave && { opacity: 0.6 },
           ]}
         >
-          <Text style={styles.ctaBtnText}>{saving ? "Saving..." : "Save"}</Text>
+          <Text style={styles.ctaBtnText}>
+            {saving ? "Saving..." : "Save"}
+          </Text>
         </Pressable>
 
         <View style={{ height: 24 }} />
