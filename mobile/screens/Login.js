@@ -56,7 +56,7 @@ export default function Login() {
                 setMessage('Login successful! Redirecting...');
                 
                 // Navigate to the Main Menu Scene
-                navigation.navigate('Home');
+                navigation.navigate('Tabs');
                 
                 // Clear state after successful navigation
                 setUsername('');

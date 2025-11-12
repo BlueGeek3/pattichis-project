@@ -8,6 +8,8 @@ import Home from "./screens/Home";
 import History from "./screens/History";
 import Log from "./screens/Log";
 import Profile from "./screens/Profile";
+import Login from "./screens/Login";
+import Registration from "./screens/Registration";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const Stack = createNativeStackNavigator();
@@ -43,7 +45,10 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Intro" component={Intro} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Registration" component={Registration} />
           <Stack.Screen name="Tabs" component={Tabs} />
+          
         </Stack.Navigator>
       </NavigationContainer>
     </PaperProvider>
