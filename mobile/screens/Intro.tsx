@@ -31,7 +31,7 @@ export default function Intro({ navigation }: any) {
       {/* Button ~20% from bottom */}
       <View style={[styles.btnWrap, { bottom: bottomOffset }]}>
         <Pressable
-          onPress={() => navigation.replace("Login")}
+          onPress={() => navigation.replace("Tabs")}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
         >
           <Text style={styles.btnText}>Get Started</Text>
