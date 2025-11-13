@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 // 1. API Configuration
 // IMPORTANT: REPLACE 'YOUR_ACTUAL_IP_ADDRESS' below with the IP from ipconfig/System Settings.
 // ----------------------------------------------------------------------
-const API_URL = 'http://192.168.x.x:8080/login.php'; 
+const API_URL = 'http://10.78.140.187:8080/login.php'; 
 
 
 export default function Login() {

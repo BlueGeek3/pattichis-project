@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 // --- CONFIGURATION ---
 // !!! IMPORTANT: REPLACE 'YOUR_ACTUAL_IP_ADDRESS' with your actual local IP (e.g., 192.168.1.5)
-const API_URL = 'http://192.168.x.x:8080/registration.php'; 
+const API_URL = 'http://10.78.140.187:8080/registration.php'; 
 
 // ---------------------
 

@@ -2,19 +2,30 @@
 // =========================================================================
 // SECTION 1: API Configuration and Security Headers (CORS)
 // =========================================================================
+// CORS + preflight
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Content-Type: application/json; charset=UTF-8");
+
+// Handle preflight quickly
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit();
+}
 
 // This header allows any client (* means all origins, i.e., your mobile app)
 // to make a request to this script, preventing CORS errors in the emulator.
-header("Access-Control-Allow-Origin: *");
+// header("Access-Control-Allow-Origin: *");
 
-// Specifies that the response body will be in JSON format.
-header("Content-Type: application/json; charset=UTF-8");
+// // Specifies that the response body will be in JSON format.
+// header("Content-Type: application/json; charset=UTF-8");
 
-// Only allows the secure POST method for sending sensitive data.
-header("Access-Control-Allow-Methods: POST");
+// // Only allows the secure POST method for sending sensitive data.
+// header("Access-Control-Allow-Methods: POST");
 
-// Specifies which headers are allowed in the request.
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+// // Specifies which headers are allowed in the request.
+// header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // =========================================================================
 // SECTION 2: Database Connection Details

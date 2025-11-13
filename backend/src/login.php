@@ -1,16 +1,29 @@
 <?php
+
+// CORS + preflight
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Content-Type: application/json; charset=UTF-8");
+
+// Handle preflight quickly
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit();
+}
+
 // =========================================================================
 // SECTION 1: API Configuration and Security Headers (CORS)
 // =========================================================================
 
 // Allow access from any origin (*).
-header("Access-Control-Allow-Origin: *");
-// Ensure the response is correctly recognized as JSON data.
-header("Content-Type: application/json; charset=UTF-8");
-// Explicitly state that only the POST method is allowed for submitting credentials.
-header("Access-Control-Allow-Methods: POST");
-// Standard headers required for complex requests (like those with JSON data).
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+// header("Access-Control-Allow-Origin: *");
+// // Ensure the response is correctly recognized as JSON data.
+// header("Content-Type: application/json; charset=UTF-8");
+// // Explicitly state that only the POST method is allowed for submitting credentials.
+// header("Access-Control-Allow-Methods: POST");
+// // Standard headers required for complex requests (like those with JSON data).
+// header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // =========================================================================
 // SECTION 2: Database Connection Details (Local XAMPP Setup)
