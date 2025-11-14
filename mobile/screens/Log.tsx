@@ -63,7 +63,9 @@ export default function Log() {
 
   return (
     <View style={{ padding: 16, gap: 16 }}>
-      <Text variant="titleMedium">New Symptom Log</Text>
+     <Text variant="titleMedium" style={{ marginTop: 28 }}>
+  New Symptom Log
+</Text>
 
       {/* Date Input */}
       <TextInput
