@@ -11,13 +11,13 @@ const USER = "demo";
 
 export default function Home() {
   const [history, setHistory] = useState<any[]>([]);
-  const today = new Date().toISOString().slice(0, 10);
 
-  // Month selection
+  // Month + Year
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [monthMenuVisible, setMonthMenuVisible] = useState(false);
+  const [yearMenuVisible, setYearMenuVisible] = useState(false);
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -28,13 +28,13 @@ export default function Home() {
     listHistory(USER).then(setHistory).catch(console.error);
   }, []);
 
-  // Filter history for selected month
+  // Filter by selected month + year
   const monthlyEntries = history.filter((h) => {
     const d = new Date(h.date);
     return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
   });
 
-  // Compute average pain per symptom
+  // Prepare chart data
   const symptomMap: Record<string, number[]> = {};
   monthlyEntries.forEach((h) => {
     if (!symptomMap[h.symptomName]) symptomMap[h.symptomName] = [];
@@ -42,19 +42,20 @@ export default function Home() {
   });
 
   const symptomNames = Object.keys(symptomMap);
+
   const avgPainPerSymptom = symptomNames.map((name) => {
     const scores = symptomMap[name];
     return scores.reduce((sum, s) => sum + s, 0) / scores.length;
   });
 
   const barChartData = {
-    labels: symptomNames.length > 0 ? symptomNames : [""],
+    labels: symptomNames.length ? symptomNames : [""],
     datasets: [
-      { data: avgPainPerSymptom.length > 0 ? avgPainPerSymptom : [0] }
+      { data: avgPainPerSymptom.length ? avgPainPerSymptom : [0] }
     ],
   };
 
-  // Group history by month for PDF
+  // Group by month for report
   const groupedByMonth: Record<string, any[]> = {};
   history.forEach((h) => {
     const d = new Date(h.date);
@@ -63,7 +64,7 @@ export default function Home() {
     groupedByMonth[key].push(h);
   });
 
-  // Generate multi-month PDF report
+  // PDF report
   async function generateFullReport() {
     if (!history.length) {
       alert("No history entries to report.");
@@ -74,7 +75,7 @@ export default function Home() {
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
+            body { font-family: Arial; padding: 20px; }
             h1 { text-align: center; }
             h2 { margin-top: 30px; }
             table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -97,14 +98,15 @@ export default function Home() {
               const monthIndex = Number(monthNum) - 1;
               const monthName = monthNames[monthIndex];
 
-              const avgPain = (entries.reduce((sum, x) => sum + x.painScore, 0) / entries.length).toFixed(1);
-              const avgHours = (entries.reduce((sum, x) => sum + x.hours, 0) / entries.length).toFixed(1);
+              const avgPain = (entries.reduce((s, x) => s + x.painScore, 0) / entries.length).toFixed(1);
+              const avgHours = (entries.reduce((s, x) => s + x.hours, 0) / entries.length).toFixed(1);
 
               const symptomMapMonth: Record<string, number[]> = {};
               entries.forEach((h) => {
                 if (!symptomMapMonth[h.symptomName]) symptomMapMonth[h.symptomName] = [];
                 symptomMapMonth[h.symptomName].push(h.painScore);
               });
+
               const symptomNamesMonth = Object.keys(symptomMapMonth);
               const avgPainPerSymptomMonth = symptomNamesMonth.map((name) => {
                 const scores = symptomMapMonth[name];
@@ -118,6 +120,7 @@ export default function Home() {
                   <p><strong>Average pain score:</strong> ${avgPain}</p>
                   <p><strong>Average hours affected:</strong> ${avgHours}</p>
                 </div>
+
                 <div class="chart">
                   <img src="https://quickchart.io/chart?c={
                     type:'bar',
@@ -128,6 +131,7 @@ export default function Home() {
                     options:{plugins:{legend:{display:false}}}
                   }" />
                 </div>
+
                 <table>
                   <tr><th>Date</th><th>Symptom</th><th>Pain</th><th>Hours</th></tr>
                   ${entries
@@ -149,17 +153,17 @@ export default function Home() {
     <PaperProvider>
       <ScrollView style={{ padding: 16 }}>
         <Text variant="titleMedium" style={{ marginTop: 50 }}>
-Syptom Diary
-</Text>
+          Symptom Diary
+        </Text>
 
-        {/* Month picker */}
+        {/* MONTH SELECTOR */}
         <View style={{ marginTop: 16 }}>
           <Menu
             visible={monthMenuVisible}
             onDismiss={() => setMonthMenuVisible(false)}
             anchor={
               <Button mode="outlined" onPress={() => setMonthMenuVisible(true)}>
-                Selected Month: {monthNames[selectedMonth]} {selectedYear}
+                Month: {monthNames[selectedMonth]}
               </Button>
             }
           >
@@ -176,7 +180,31 @@ Syptom Diary
           </Menu>
         </View>
 
-        {/* Bar chart wrapped in horizontal scroll */}
+        {/* YEAR SELECTOR */}
+        <View style={{ marginTop: 12 }}>
+          <Menu
+            visible={yearMenuVisible}
+            onDismiss={() => setYearMenuVisible(false)}
+            anchor={
+              <Button mode="outlined" onPress={() => setYearMenuVisible(true)}>
+                Year: {selectedYear}
+              </Button>
+            }
+          >
+            {[2025, 2024, 2023, 2022].map((y) => (
+              <Menu.Item
+                key={y}
+                onPress={() => {
+                  setSelectedYear(y);
+                  setYearMenuVisible(false);
+                }}
+                title={String(y)}
+              />
+            ))}
+          </Menu>
+        </View>
+
+        {/* BAR CHART */}
         {monthlyEntries.length > 0 && (
           <ScrollView horizontal style={{ marginTop: 24 }}>
             <View
@@ -205,13 +233,15 @@ Syptom Diary
                 withHorizontalLabels={true}
                 withInnerLines={true}
                 barPercentage={0.6}
-                formatXLabel={(label) => (label.length > 12 ? label.slice(0, 12) + "…" : label)}
+                formatXLabel={(label) =>
+                  label.length > 12 ? label.slice(0, 12) + "…" : label
+                }
               />
             </View>
           </ScrollView>
         )}
 
-        {/* Full history PDF Report */}
+        {/* PDF REPORT */}
         <Button style={{ marginTop: 29 }} mode="contained" onPress={generateFullReport}>
           Download Full History PDF Report
         </Button>
