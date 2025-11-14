@@ -96,6 +96,9 @@ export const updateUser = (
 
 export const listSymptoms = () => apiGet<any[]>("/symptoms");
 export const listHistory  = (u: string) => apiGet<any[]>(`/history?username=${encodeURIComponent(u)}`);
+export const listHistoryLastWeek = (u: string) =>
+  apiGet<any[]>(`/history/last-week?username=${encodeURIComponent(u)}`);
+
 export const listLogDates = (u: string) => apiGet<string[]>(`/dates?username=${encodeURIComponent(u)}`);
 export const createLog    = (p:{username:string;date:string;hours:number;painScore:number;symptomId:number;}) =>
   apiPost<{ok:boolean;id:number}>("/log", p);

@@ -239,4 +239,36 @@ router.post("/rating", async (req, res) => {
   }
 });
 
+/**
+ * GET /ms-api/history/last-week?username=demo
+ * Returns symptom history for the last 7 days (MySQL).
+ */
+router.get("/history/last-week", async (req, res) => {
+  const { username } = req.query;
+  if (!username) {
+    return res.status(400).json({ error: "username required" });
+  }
+
+  try {
+    const rows = await q(
+      `SELECT
+         shl.ID          AS id,
+         shl.date        AS date,
+         shl.hours       AS hours,
+         shl.painScore   AS painScore,
+         s.name          AS symptomName
+       FROM symptomshistorylog shl
+       JOIN symptoms s ON shl.symptomId = s.ID
+       WHERE shl.username = ?
+         AND shl.date >= (CURDATE() - INTERVAL 7 DAY)
+       ORDER BY shl.date DESC, shl.ID DESC`,
+      [username]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error("history last-week error:", err);
+    res.status(500).json({ error: err.message || String(err) });
+  }
+});
 export default router;
