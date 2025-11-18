@@ -4,7 +4,6 @@ import { Text, Button, Menu, Provider as PaperProvider } from "react-native-pape
 import { BarChart } from "react-native-chart-kit";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-
 import { listHistory } from "../lib/api";
 
 const USER = "demo";
@@ -42,7 +41,6 @@ export default function Home() {
   });
 
   const symptomNames = Object.keys(symptomMap);
-
   const avgPainPerSymptom = symptomNames.map((name) => {
     const scores = symptomMap[name];
     return scores.reduce((sum, s) => sum + s, 0) / scores.length;
@@ -106,7 +104,6 @@ export default function Home() {
                 if (!symptomMapMonth[h.symptomName]) symptomMapMonth[h.symptomName] = [];
                 symptomMapMonth[h.symptomName].push(h.painScore);
               });
-
               const symptomNamesMonth = Object.keys(symptomMapMonth);
               const avgPainPerSymptomMonth = symptomNamesMonth.map((name) => {
                 const scores = symptomMapMonth[name];
@@ -120,7 +117,6 @@ export default function Home() {
                   <p><strong>Average pain score:</strong> ${avgPain}</p>
                   <p><strong>Average hours affected:</strong> ${avgHours}</p>
                 </div>
-
                 <div class="chart">
                   <img src="https://quickchart.io/chart?c={
                     type:'bar',
@@ -131,12 +127,9 @@ export default function Home() {
                     options:{plugins:{legend:{display:false}}}
                   }" />
                 </div>
-
                 <table>
                   <tr><th>Date</th><th>Symptom</th><th>Pain</th><th>Hours</th></tr>
-                  ${entries
-                    .map((h) => `<tr><td>${h.date}</td><td>${h.symptomName}</td><td>${h.painScore}</td><td>${h.hours}</td></tr>`)
-                    .join("")}
+                  ${entries.map((h) => `<tr><td>${h.date}</td><td>${h.symptomName}</td><td>${h.painScore}</td><td>${h.hours}</td></tr>`).join("")}
                 </table>
               `;
             })
@@ -233,9 +226,7 @@ export default function Home() {
                 withHorizontalLabels={true}
                 withInnerLines={true}
                 barPercentage={0.6}
-                formatXLabel={(label) =>
-                  label.length > 12 ? label.slice(0, 12) + "…" : label
-                }
+                formatXLabel={(label) => (label.length > 12 ? label.slice(0, 12) + "…" : label)}
               />
             </View>
           </ScrollView>
