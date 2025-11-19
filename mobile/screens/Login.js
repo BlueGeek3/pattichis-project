@@ -1,212 +1,189 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Alert,
+  Platform,
+  ScrollView,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import GlobalStyles from "../Styles/GlobalStyles";
 
-// ----------------------------------------------------------------------
-// 1. API Configuration
+// Import the saveToken function from your new utility file
+// Ensure the path "../utils/authStorage" matches your folder structure
+import { saveAuthToken } from "../utils/authStorage";
+
 // IMPORTANT: REPLACE 'YOUR_ACTUAL_IP_ADDRESS' below with the IP from ipconfig/System Settings.
 // ----------------------------------------------------------------------
-const API_URL = 'http://10.78.140.187:8080/login.php'; 
-
+const API_URL = "http://192.168.x.x:8080/login.php";
 
 export default function Login() {
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
-    // State for user input
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+  // State for user input
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-    // State for UI feedback
-    const [message, setMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+  // State for UI feedback
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-    /**
-     * Handles the login process by sending credentials to the PHP API.
-     */
-    const handleLogin = async () => {
-        if (!username || !password) {
-            setMessage('Please enter both username and password.');
-            return;
+  /**
+   * Handles the login process by sending credentials to the PHP API.
+   */
+  const handleLogin = async () => {
+    if (!username || !password) {
+      setMessage("Please enter both username and password.");
+      return;
+    }
+
+    setIsLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Send username and password as JSON payload
+        body: JSON.stringify({ username, password }),
+      });
+
+      // Check if the network request itself failed (e.g., 404, 500)
+      if (!response.ok) {
+        // Read the response text for better debugging
+        const errorText = await response.text();
+        throw new Error(
+          `Server responded with status ${response.status}: ${errorText}`
+        );
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // --- TOKEN LOGIC START ---
+        // 1. Check if the token exists in the response
+        if (data.token) {
+          // 2. Save the token persistently
+          console.log(
+            "Login successful. Token received from server:",
+            data.token
+          );
+          await saveAuthToken(data.token);
+        } else {
+          console.warn(
+            "Login was successful, but NO token was returned by the server."
+          );
         }
+        // --- TOKEN LOGIC END ---
+        // Login successful
+        setMessage("Login successful! Redirecting...");
 
-        setIsLoading(true);
-        setMessage('');
+        // Navigate to the Main Menu Scene
+        navigation.navigate("Tabs");
 
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                // Send username and password as JSON payload
-                body: JSON.stringify({ username, password }),
-            });
+        // Clear state after successful navigation
+        setUsername("");
+        setPassword("");
+      } else {
+        // Login failed (e.g., bad credentials) - show message from API
+        setMessage(`Login Failed: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      setMessage(
+        `Network Error: Could not connect to the server. Check your API_URL and server status.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            // Check if the network request itself failed (e.g., 404, 500)
-            if (!response.ok) {
-                // Read the response text for better debugging
-                const errorText = await response.text();
-                throw new Error(`Server responded with status ${response.status}: ${errorText}`);
-            }
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      KeyboardAvoidingView
+    >
+      <ScrollView
+        contentContainerStyle={GlobalStyles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={GlobalStyles.header}>Welcome Back!</Text>
 
-            const data = await response.json();
-
-            if (data.success) {
-                // Login successful
-                setMessage('Login successful! Redirecting...');
-                
-                // Navigate to the Main Menu Scene
-                navigation.navigate('Tabs');
-                
-                // Clear state after successful navigation
-                setUsername('');
-                setPassword('');
-            } else {
-                // Login failed (e.g., bad credentials) - show message from API
-                setMessage(`Login Failed: ${data.message}`);
-            }
-
-        } catch (error) {
-            console.error('Login Error:', error);
-            setMessage(`Network Error: Could not connect to the server. Check your API_URL and server status.`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Welcome Back!</Text>
-
-            {/* Username Input Group */}
-            <Text style={styles.label}>Username</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Enter your username"
-                placeholderTextColor="#9ca3af"
-                value={username}
-                onChangeText={setUsername}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
-
-            {/* Password Input Group */}
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Enter your password"
-                placeholderTextColor="#9ca3af"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={true}
-            />
-
-            {/* Message Display (Feedback) */}
-            {message ? (
-                <Text style={[styles.message, { color: message.includes('successful') ? '#10b981' : '#ef4444' }]}>
-                    {message}
-                </Text>
-            ) : null}
-
-            {/* Login Button */}
-            <TouchableOpacity 
-                style={styles.loginButton} 
-                onPress={handleLogin}
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text style={styles.loginButtonText}>LOG IN</Text>
-                )}
-            </TouchableOpacity>
-
-            {/* Footer Links (Forgot Password & Register) */}
-            <View style={styles.footerLinks}>
-                <TouchableOpacity onPress={() => { /* Placeholder for future implementation */ }}>
-                    <Text style={styles.linkText}>Forgot Password?</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
-                    <Text style={styles.linkText}>New User? Register</Text>
-                </TouchableOpacity>
-            </View>
+        {/* Username Input Group */}
+        <View style={GlobalStyles.fieldGroup}>
+          <Text style={GlobalStyles.label}>Username</Text>
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Enter your username"
+            placeholderTextColor="#9ca3af"
+            value={username}
+            onChangeText={setUsername}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
         </View>
-    );
-}
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingHorizontal: 30,
-        paddingTop: Platform.OS === 'android' ? 50 : 0, // Add padding for Android status bar
-        backgroundColor: '#f9fafb',
-        alignItems: 'center',
-    },
-    header: {
-        fontSize: 28,
-        fontWeight: '700',
-        color: '#1f2937',
-        marginBottom: 30,
-        marginTop: 50,
-    },
-    label: {
-        alignSelf: 'flex-start',
-        fontSize: 16,
-        color: '#4b5563',
-        marginBottom: 8,
-        fontWeight: '600',
-    },
-    input: {
-        width: '100%',
-        height: 50,
-        backgroundColor: '#ffffff',
-        borderColor: '#d1d5db',
-        borderWidth: 1,
-        borderRadius: 12,
-        paddingHorizontal: 15,
-        fontSize: 16,
-        color: '#1f2937',
-        marginBottom: 20,
-    },
-    message: {
-        marginTop: 15,
-        marginBottom: 15,
-        fontSize: 14,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    loginButton: {
-        width: '100%',
-        paddingVertical: 14,
-        backgroundColor: '#1d4ed8', // A deep blue color
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 20,
-        // Shadow for iOS
-        shadowColor: '#1d4ed8',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        // Shadow for Android
-        elevation: 8,
-    },
-    loginButtonText: {
-        color: '#ffffff',
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    footerLinks: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 25,
-    },
-    linkText: {
-        color: '#6b7280',
-        fontSize: 14,
-        fontWeight: '500',
-        textDecorationLine: 'underline',
-    },
-});
+        {/* Password Input Group */}
+        <View style={GlobalStyles.fieldGroup}>
+          <Text style={GlobalStyles.label}>Password</Text>
+          <TextInput
+            style={GlobalStyles.input}
+            placeholder="Enter your password"
+            placeholderTextColor="#9ca3af"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={true}
+          />
+        </View>
+
+        {/* Message Display (Feedback) */}
+        {message ? (
+          <Text
+            style={[
+              GlobalStyles.message,
+              { color: message.includes("successful") ? "#10b981" : "#ef4444" },
+            ]}
+          >
+            {message}
+          </Text>
+        ) : null}
+
+        {/* Login Button */}
+        <TouchableOpacity
+          style={GlobalStyles.loginButton}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={GlobalStyles.loginButtonText}>LOG IN</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Footer Links (Forgot Password & Register) */}
+        <View style={GlobalStyles.footerLinks}>
+          <TouchableOpacity
+            onPress={() => {
+              /* Placeholder for future implementation */
+            }}
+          >
+            <Text style={GlobalStyles.linkText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate("Registration")}>
+            <Text style={GlobalStyles.linkText}>New User? Register</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}

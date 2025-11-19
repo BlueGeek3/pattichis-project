@@ -117,8 +117,12 @@ $stmt->fetch();
 // 6.1 Core Verification Logic
 if ($stmt->num_rows == 1 && $pass == $user_pass) {    
     // Success: Login credentials are valid.
+    // Generate a secure random token (acting as a session ID for now)
+    // In a production app, you would store this in the DB or use a JWT library.
+    $token = bin2hex(random_bytes(32));
+
     http_response_code(200); // OK
-    echo json_encode(["success" => true, "message" => "Login successful. Welcome!"]);   
+    echo json_encode(["success" => true, "message" => "Login successful. Welcome!","token" => $token]);   
 }
 else {
     // Failure: Username not found OR password did not match.

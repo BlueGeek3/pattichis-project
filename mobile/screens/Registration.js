@@ -4,13 +4,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import GlobalStyles from "../Styles/GlobalStyles";
 
 // --- CONFIGURATION ---
 // !!! IMPORTANT: REPLACE 'YOUR_ACTUAL_IP_ADDRESS' with your actual local IP (e.g., 192.168.1.5)
@@ -121,12 +121,12 @@ const Registration = () => {
   const getInputStyle = (field) => {
     const status = fieldStatus[field];
     if (status === "error") {
-      return styles.input_error;
+      return GlobalStyles.input_error;
     }
     if (status === "success") {
-      return styles.input_success;
+      return GlobalStyles.input_success;
     }
-    return {}; // Default style uses base styles.input
+    return {}; // Default style uses base GlobalStyles.input
   };
 
   const handleRegistration = async () => {
@@ -228,17 +228,18 @@ const Registration = () => {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      KeyboardAvoidingView
     >
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={GlobalStyles.container}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>Create Your Account</Text>
+        <Text style={GlobalStyles.title}>Create Your Account</Text>
 
         {/* Message Display for success/error/validation */}
         <Text
           style={[
-            styles.message,
+            GlobalStyles.message,
             {
               color: message.includes("successful")
                 ? "green"
@@ -251,24 +252,26 @@ const Registration = () => {
           {message}
         </Text>
         {/* --- Username Field Group --- */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Username</Text>
+        <View style={GlobalStyles.fieldGroup}>
+          <Text style={GlobalStyles.label}>Username</Text>
           <TextInput
-            style={[styles.input, getInputStyle("username")]}
+            style={[GlobalStyles.input, getInputStyle("username")]}
             placeholder="Username"
             onChangeText={handleUsernameChange}
             autoCapitalize="none"
           />
           {!!validationErrors.username && (
-            <Text style={styles.errorText}>{validationErrors.username}</Text>
+            <Text style={GlobalStyles.errorText}>
+              {validationErrors.username}
+            </Text>
           )}
         </View>
 
         {/* --- Password Field Group --- */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Password</Text>
+        <View style={GlobalStyles.fieldGroup}>
+          <Text style={GlobalStyles.label}>Password</Text>
           <TextInput
-            style={[styles.input, getInputStyle("password")]}
+            style={[GlobalStyles.input, getInputStyle("password")]}
             placeholder="Password (min 6 characters)"
             value={password}
             onChangeText={handlePasswordChange}
@@ -276,15 +279,17 @@ const Registration = () => {
             autoCapitalize="none"
           />
           {!!validationErrors.password && (
-            <Text style={styles.errorText}>{validationErrors.password}</Text>
+            <Text style={GlobalStyles.errorText}>
+              {validationErrors.password}
+            </Text>
           )}
         </View>
 
         {/* --- Confirm Password Field Group --- */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Confirm Password</Text>
+        <View style={GlobalStyles.fieldGroup}>
+          <Text style={GlobalStyles.label}>Confirm Password</Text>
           <TextInput
-            style={[styles.input, getInputStyle("retypedPass")]}
+            style={[GlobalStyles.input, getInputStyle("retypedPass")]}
             placeholder="Password (min 6 characters)"
             value={retypedPass}
             onChangeText={handleRetypedPassChange}
@@ -292,15 +297,17 @@ const Registration = () => {
             autoCapitalize="none"
           />
           {!!validationErrors.retypedPass && (
-            <Text style={styles.errorText}>{validationErrors.retypedPass}</Text>
+            <Text style={GlobalStyles.errorText}>
+              {validationErrors.retypedPass}
+            </Text>
           )}
         </View>
 
         {/* --- Email Field Group --- */}
-        <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Email Address</Text>
+        <View style={GlobalStyles.fieldGroup}>
+          <Text style={GlobalStyles.label}>Email Address</Text>
           <TextInput
-            style={[styles.input, getInputStyle("email")]}
+            style={[GlobalStyles.input, getInputStyle("email")]}
             placeholder="Email Address"
             value={email}
             onChangeText={handleEmailChange}
@@ -308,24 +315,24 @@ const Registration = () => {
             autoCapitalize="none"
           />
           {!!validationErrors.email && (
-            <Text style={styles.errorText}>{validationErrors.email}</Text>
+            <Text style={GlobalStyles.errorText}>{validationErrors.email}</Text>
           )}
         </View>
 
         <TouchableOpacity
-          style={styles.button}
+          style={GlobalStyles.button}
           onPress={handleRegistration}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>REGISTER</Text>
+            <Text style={GlobalStyles.buttonText}>REGISTER</Text>
           )}
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.linkText}>
+          <Text style={GlobalStyles.linkText}>
             Already have an account? Login here.
           </Text>
         </TouchableOpacity>
@@ -333,81 +340,5 @@ const Registration = () => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#9ac4b6ff",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-    color: "#333",
-  },
-  fieldGroup: {
-    marginBottom: 15, // Space between field groups
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 5,
-    paddingLeft: 5,
-  },
-  input: {
-    height: 50,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    backgroundColor: "#fff",
-    fontSize: 16,
-  },
-  // NEW Style for Error State (Red Border)
-  input_error: {
-    borderColor: "#EF4444", // Red-500
-    borderWidth: 4, // Thicker border for visual emphasis
-  },
-  // NEW Style for Success State (Green Border)
-  input_success: {
-    borderColor: "#10B981", // Green-500
-    borderWidth: 4,
-  },
-  errorText: {
-    color: "#EF4444",
-    fontSize: 12,
-    marginTop: 4,
-    paddingLeft: 5,
-    fontWeight: "500",
-  },
-  button: {
-    backgroundColor: "#007AFF", // Standard iOS blue
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  message: {
-    textAlign: "center",
-    marginBottom: 15,
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  linkText: {
-    textAlign: "center",
-    color: "#007AFF",
-    marginTop: 10,
-    fontSize: 15,
-  },
-});
 
 export default Registration;
