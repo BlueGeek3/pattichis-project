@@ -35,6 +35,22 @@ export default function Login() {
 
   // --- NEW FUNCTION: Handle Forgot Password Click ---
   const handleForgotPassword = () => {
+    Alert.alert(
+      "Reset Password Instructions", // Title
+      "To reset your password, please contact your administrator or email support@example.com.\n\nWe will send you a temporary password shortly.", // Message
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: () => console.log("OK Pressed"),
+        },
+      ]
+    );
+  };
+
   /**
    * Handles the login process by sending credentials to the PHP API.
    */
@@ -173,9 +189,7 @@ export default function Login() {
 
         {/* Footer Links (Forgot Password & Register) */}
         <View style={GlobalStyles.footerLinks}>
-              /* Placeholder for future implementation */
-            }}
-          >
+          <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={GlobalStyles.linkText}>Forgot Password?</Text>
           </TouchableOpacity>
 
