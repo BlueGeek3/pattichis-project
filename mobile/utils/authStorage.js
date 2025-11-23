@@ -24,6 +24,7 @@ export const saveAuthToken = async (token) => {
 export const getToken = async () => {
   try {
     const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+    console.log("Token retrieved successfully");
     return token;
   } catch (error) {
     console.error("Error retrieving token:", error);
