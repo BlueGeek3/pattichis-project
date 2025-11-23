@@ -150,5 +150,13 @@ From backend/src:
 Assuming xampp is under C drive otherwise change the path of the following command:
 "C:\xampp\php\php.exe" -S 0.0.0.0:8080
 
-Under mobile, run the following command to save authentication token on device storage:
+Under mobile, run the following command
+ to save authentication token on device storage:
 npm install @react-native-async-storage/async-storage
+
+for the dropdown list run :
+npm install react-native-element-dropdown
+
+for the report :
+npm install react-native-chart-kit react-native-svg
+npm install expo-print expo-sharing
