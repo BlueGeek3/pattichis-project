@@ -33,6 +33,7 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // --- NEW FUNCTION: Handle Forgot Password Click ---
   /**
    * Handles the login process by sending credentials to the PHP API.
    */
@@ -171,7 +172,6 @@ export default function Login() {
 
         {/* Footer Links (Forgot Password & Register) */}
         <View style={GlobalStyles.footerLinks}>
-          <TouchableOpacity
             onPress={() => {
               /* Placeholder for future implementation */
             }}
