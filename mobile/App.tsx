@@ -12,23 +12,45 @@ import Login from "./screens/Login";
 import Registration from "./screens/Registration";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+import { SettingsProvider, useSettings } from "./utils/SettingsContext";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function Tabs() {
+  // Use the global settings context inside the Tabs component
+  const { isDarkMode, language } = useSettings();
+
+  // Apply dynamic styling based on the global theme state
+  const tabBarBackgroundColor = isDarkMode ? "#1e1e1e" : "#f8f8f8";
+  const tabBarInactiveColor = isDarkMode ? "#888" : "#666";
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
-          const map: Record<string,string> = {
+          const map: Record<string, string> = {
             Home: "home",
             History: "history",
             Log: "plus-circle",
             Profile: "account",
           };
-          return <MaterialCommunityIcons name={map[route.name]} size={size} color={color} />;
+          return (
+            <MaterialCommunityIcons
+              name={map[route.name]}
+              size={size}
+              color={color}
+            />
+          );
         },
+        // Apply responsive styling to the tab bar container
+        tabBarStyle: {
+          backgroundColor: tabBarBackgroundColor,
+          borderTopColor: isDarkMode ? "#333" : "#ddd",
+        },
+        tabBarInactiveTintColor: tabBarInactiveColor,
+        tabBarActiveTintColor: "#007BFF", // Keep active color blue regardless of mode
       })}
     >
       <Tab.Screen name="Home" component={Home} />
@@ -41,16 +63,17 @@ function Tabs() {
 
 export default function App() {
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Intro" component={Intro} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Registration" component={Registration} />
-          <Stack.Screen name="Tabs" component={Tabs} />
-          
-        </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
+    <SettingsProvider>
+      <PaperProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Intro" component={Intro} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Registration" component={Registration} />
+            <Stack.Screen name="Tabs" component={Tabs} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    </SettingsProvider>
   );
 }
