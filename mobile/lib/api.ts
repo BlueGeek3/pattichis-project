@@ -104,3 +104,14 @@ export const createLog    = (p:{username:string;date:string;hours:number;painSco
   apiPost<{ok:boolean;id:number}>("/log", p);
 export const createRating = (p:{username:string;date:string;rating:number;}) =>
   apiPost<{ok:boolean;daily_id:number}>("/rating", p);
+export const createBloodPressure = (p: {
+  username: string;
+  systolic: string;
+  diastolic: string;
+  date: string;       // yyyy-mm-dd
+}) =>
+  apiPost<{ message: string; insertId: number | null }>(
+    "/bloodpressure",
+    p
+  );
+

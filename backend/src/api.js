@@ -271,4 +271,35 @@ router.get("/history/last-week", async (req, res) => {
     res.status(500).json({ error: err.message || String(err) });
   }
 });
+
+router.post('/bloodpressure', async (req, res) => {
+  try {
+    const { username, systolic, diastolic, date } = req.body;
+
+    // Basic validation
+    if (!username || !systolic || !diastolic || !date) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const sql = `
+      INSERT INTO bloodpressure (username, systolic, diastolic, date)
+      VALUES (?, ?, ?, ?)
+    `;
+
+    const [result] = await pool.execute(sql, [
+      username, systolic, diastolic, date
+    ]);
+
+    res.json({
+      message: "Blood pressure entry created",
+      insertId: result.insertId || null
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Database error", details: err.message });
+  }
+});
+
+
 export default router;
