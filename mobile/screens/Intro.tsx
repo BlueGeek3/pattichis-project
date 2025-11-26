@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 
-const bg = require("../assets/brain.png");
+const bg = require("../assets/bg-intro.png");
 
 export default function Intro({ navigation }: any) {
   const { height } = useWindowDimensions();
