@@ -5,6 +5,7 @@ import {
   StyleSheet,
   useWindowDimensions,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Button, TextInput, Text } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
@@ -19,10 +20,17 @@ import { useSettings } from "../utils/SettingsContext";
 
 import { getTranslations } from "../utils/translations";
 
-const USER = "demo";
+// Added imports to get global username
+import { getUsername } from "../utils/authStorage";
+import { useNavigation, StackActions } from "@react-navigation/native";
+
+//const USER = "demo";
+let USER = "demo";
 const bg = require("../assets/bg-screens.png");
 
 export default function Log() {
+  const navigation = useNavigation();
+
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [symptomId, setSymptomId] = useState<string>("");
   const [pain, setPain] = useState("5");
@@ -50,6 +58,19 @@ export default function Log() {
 
   // Load symptoms on mount
   useEffect(() => {
+    //Get global user name
+    const loadCredentials = async () => {
+      const fetchedUsername = await getUsername();
+
+      if (!fetchedUsername) {
+        Alert.alert(t.session_expired_title, t.session_expired_msg);
+        navigation.dispatch(StackActions.replace("Login"));
+        return;
+      }
+      USER = fetchedUsername;
+    };
+    loadCredentials();
+    // ---------------------
     listSymptoms().then(setSymptoms).catch(console.error);
   }, []);
 

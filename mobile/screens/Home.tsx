@@ -27,12 +27,13 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { listHistory } from "../lib/api";
 import { useNavigation, StackActions } from "@react-navigation/native";
-import { getToken, removeToken } from "../utils/authStorage";
+import { getUsername, removeUsername } from "../utils/authStorage";
 import { useSettings } from "../utils/SettingsContext";
 
 import { getTranslations, getMonthNames } from "../utils/translations";
 
-const USER = "demo";
+//const USER = "demo";
+let USER = "demo";
 const AVAILABLE_LANGUAGES = ["English", "Greek"];
 const bg = require("../assets/bg-screens.png");
 
@@ -198,22 +199,25 @@ export default function Home() {
   const isWeb = Platform.OS === "web";
 
   useEffect(() => {
-    const loadDashboard = async () => {
-      const token = await getToken();
-      if (!token) {
+    const loadCredentials = async () => {
+      const fetchedUsername = await getUsername();
+
+      if (!fetchedUsername) {
         Alert.alert(t.session_expired_title, t.session_expired_msg);
         navigation.dispatch(StackActions.replace("Login"));
         return;
       }
+      USER = fetchedUsername;
+      setUserName(fetchedUsername!);
       listHistory(USER).then(setHistory).catch(console.error);
     };
-    loadDashboard();
+    loadCredentials();
   }, []);
 
   const handleLogout = useCallback(async () => {
     setMenuVisible(false);
     try {
-      await removeToken();
+      await removeUsername();
       Alert.alert(t.logged_out_title, t.logged_out_msg);
       navigation.dispatch(StackActions.replace("Login"));
     } catch (e) {
@@ -417,6 +421,7 @@ export default function Home() {
               }
               style={{ marginTop: 20, marginRight: 10 }}
             >
+              <Menu.Item title={USER} titleStyle={{ color: "#000000ff" }} />
               <Menu.Item
                 onPress={() => {
                   setMenuVisible(false);

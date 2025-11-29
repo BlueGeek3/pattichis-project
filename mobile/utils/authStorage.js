@@ -1,33 +1,33 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Key used to store the authentication token
-const AUTH_TOKEN_KEY = "@user_auth_token";
+// NEW KEY for the username
+const USERNAME_KEY = "@user_username";
 
 /**
- * Saves the authentication token to the device.
- * @param {string} token
+ * Saves the authenticated user's username.
+ * @param {string} username
  */
-export const saveAuthToken = async (token) => {
+export const saveUsername = async (username) => {
   try {
-    await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
-    console.log("Token saved successfully");
+    await AsyncStorage.setItem(USERNAME_KEY, username);
+    console.log("Username saved successfully");
   } catch (error) {
-    console.error("Error saving token:", error);
+    console.error("Error saving username:", error);
     throw error;
   }
 };
 
 /**
- * Retrieves the authentication token from the device.
- * @returns {Promise<string|null>} The token or null if not found.
+ * Retrieves the authenticated user's username.
+ * @returns {Promise<string|null>} The username or null if not found.
  */
-export const getToken = async () => {
+export const getUsername = async () => {
   try {
-    const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
-    console.log("Token retrieved successfully");
-    return token;
+    const username = await AsyncStorage.getItem(USERNAME_KEY);
+    console.log("Username retrieved successfully");
+    return username;
   } catch (error) {
-    console.error("Error retrieving token:", error);
+    console.error("Error retrieving username:", error);
     return null;
   }
 };
@@ -35,12 +35,12 @@ export const getToken = async () => {
 /**
  * Removes the authentication token (used for logging out).
  */
-export const removeToken = async () => {
+export const removeUsername = async () => {
   try {
-    await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
-    console.log("Token removed successfully");
+    await AsyncStorage.removeItem(USERNAME_KEY);
+    console.log("User removed successfully");
   } catch (error) {
-    console.error("Error removing token:", error);
+    console.error("Error removing user:", error);
     throw error;
   }
 };

@@ -17,6 +17,10 @@ import { useSettings } from "../utils/SettingsContext";
 
 import { getTranslations } from "../utils/translations";
 
+// Added imports to get global username
+import { getUsername } from "../utils/authStorage";
+import { useNavigation, StackActions } from "@react-navigation/native";
+
 const bg = require("../assets/bg-screens.png");
 
 type User = {
@@ -31,6 +35,8 @@ type User = {
 const USER_ENDPOINT = `${BASE}/user`;
 
 export default function Profile() {
+  const navigation = useNavigation();
+
   const { height } = useWindowDimensions();
   const topPad = height * 0.05;
 
@@ -72,10 +78,20 @@ export default function Profile() {
 
   // --- fetch user data (demo user for now) ---
   useEffect(() => {
-    const username = "demo"; // TODO: replace with auth user
-
+    //const username = "demo"; // TODO: replace with auth user
+    let username = "demo";
     (async () => {
       try {
+        //Get global user name
+        const fetchedUsername = await getUsername();
+        if (!fetchedUsername) {
+          Alert.alert(t.session_expired_title, t.session_expired_msg);
+          navigation.dispatch(StackActions.replace("Login"));
+          return;
+        }
+        username = fetchedUsername;
+        // ---------------------
+
         const res = await fetch(`${USER_ENDPOINT}?username=${username}`);
         const data = await res.json();
 

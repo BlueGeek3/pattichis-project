@@ -8,6 +8,7 @@ import {
   Pressable,
   Text,
   FlatList,
+  Alert,
 } from "react-native";
 import {
   ActivityIndicator,
@@ -25,7 +26,12 @@ import { useSettings } from "../utils/SettingsContext";
 
 import { getTranslations } from "../utils/translations";
 
-const USER = "demo";
+// Added imports to get global username
+import { getUsername } from "../utils/authStorage";
+import { useNavigation, StackActions } from "@react-navigation/native";
+
+//const USER = "demo";
+let USER = "demo";
 const bg = require("../assets/bg-screens.png");
 
 type HistoryItem = {
@@ -40,6 +46,8 @@ type HistoryItem = {
 };
 
 export default function History() {
+  const navigation = useNavigation();
+
   const { height } = useWindowDimensions();
   const topPad = height * 0.05;
 
@@ -99,6 +107,20 @@ export default function History() {
   };
 
   useEffect(() => {
+    //Get global user name
+    const loadCredentials = async () => {
+      const fetchedUsername = await getUsername();
+
+      if (!fetchedUsername) {
+        Alert.alert(t.session_expired_title, t.session_expired_msg);
+        navigation.dispatch(StackActions.replace("Login"));
+        return;
+      }
+      USER = fetchedUsername;
+    };
+    loadCredentials();
+    // ---------------------
+
     load();
   }, []);
 

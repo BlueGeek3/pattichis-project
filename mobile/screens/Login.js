@@ -14,13 +14,12 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import GlobalStyles from "../Styles/GlobalStyles";
 
-// Import the saveToken function from your new utility file
-// Ensure the path "../utils/authStorage" matches your folder structure
-import { saveAuthToken } from "../utils/authStorage";
+// Import the saveUsername function from your new utility file
+import { saveUsername } from "../utils/authStorage";
 
 // IMPORTANT: REPLACE 'YOUR_ACTUAL_IP_ADDRESS' below with the IP from ipconfig/System Settings.
 // ----------------------------------------------------------------------
-const API_URL = "http://192.168.x.x:8080/login.php";
+const API_URL = "http://192.168.10.10:8080/login.php";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -85,21 +84,21 @@ export default function Login() {
       const data = await response.json();
 
       if (data.success) {
-        // --- TOKEN LOGIC START ---
-        // 1. Check if the token exists in the response
-        if (data.token) {
-          // 2. Save the token persistently
+        // --- USER LOGIC START ---
+        // 1. Check if the USER exists in the response
+        if (data.user) {
+          // 2. Save the user persistently
           console.log(
-            "Login successful. Token received from server:",
-            data.token
+            "Login successful. User received from server:",
+            data.user
           );
-          await saveAuthToken(data.token);
+          await saveUsername(data.user);
         } else {
           console.warn(
-            "Login was successful, but NO token was returned by the server."
+            "Login was successful, but NO user was returned by the server."
           );
         }
-        // --- TOKEN LOGIC END ---
+        // --- USER LOGIC END ---
         // Login successful
         setMessage("Login successful! Redirecting...");
 
