@@ -30,6 +30,8 @@ import { useNavigation, StackActions } from "@react-navigation/native";
 import { getToken, removeToken } from "../utils/authStorage";
 import { useSettings } from "../utils/SettingsContext";
 
+import { getTranslations, getMonthNames } from "../utils/translations";
+
 const USER = "demo";
 const AVAILABLE_LANGUAGES = ["English", "Greek"];
 const bg = require("../assets/bg-screens.png");
@@ -40,6 +42,10 @@ const bg = require("../assets/bg-screens.png");
 const SettingsModal = ({ isVisible, onClose }) => {
   const { isDarkMode, language, toggleDarkMode, setLanguage } = useSettings();
   const [languageMenuVisible, setLanguageMenuVisible] = useState(false);
+
+  // Use of helper function to get translations
+  const t = getTranslations(language);
+  // --------------------------------
 
   const modalBackground = isDarkMode ? "#1e1e1e" : "white";
   const textColor = isDarkMode ? "white" : "#000000";
@@ -61,12 +67,12 @@ const SettingsModal = ({ isVisible, onClose }) => {
           variant="titleLarge"
           style={{ color: textColor, marginBottom: 20 }}
         >
-          Settings
+          {t.settings_title}
         </Text>
 
         {/* Dark Mode Toggle */}
         <List.Item
-          title="Dark Mode"
+          title={t.dark_mode_title}
           titleStyle={{ color: textColor }}
           right={() => (
             <Switch
@@ -82,7 +88,7 @@ const SettingsModal = ({ isVisible, onClose }) => {
 
         {/* Language Selector */}
         <List.Item
-          title="Language"
+          title={t.language_title}
           titleStyle={{ color: textColor }}
           description={language}
           descriptionStyle={{ color: isDarkMode ? "#aaa" : "#666" }}
@@ -102,7 +108,7 @@ const SettingsModal = ({ isVisible, onClose }) => {
                   }}
                   onPress={() => setLanguageMenuVisible(true)}
                 >
-                  Change
+                  {t.change_btn}
                 </Button>
               }
             >
@@ -127,10 +133,14 @@ const SettingsModal = ({ isVisible, onClose }) => {
         <Button
           mode="contained"
           onPress={onClose}
-          style={{ marginTop: 30, backgroundColor: "#4A4A4A", borderRadius: 24 }}
+          style={{
+            marginTop: 30,
+            backgroundColor: "#4A4A4A",
+            borderRadius: 24,
+          }}
           textColor="#ffffff"
         >
-          Close
+          {t.close_btn}
         </Button>
       </Modal>
     </Portal>
@@ -156,7 +166,12 @@ export default function Home() {
   const [monthMenuVisible, setMonthMenuVisible] = useState(false);
   const [yearMenuVisible, setYearMenuVisible] = useState(false);
 
-  const monthNames = [
+  // Use of helper functions to get translations
+  const t = getTranslations(language);
+  const monthNames = getMonthNames(language);
+  // --------------------------------
+
+  /* const monthNames = [
     "January",
     "February",
     "March",
@@ -169,7 +184,7 @@ export default function Home() {
     "October",
     "November",
     "December",
-  ];
+  ];*/
 
   // Softer overlay so background image is visible, similar feel to History screen
   const themeBackgroundOverlay = isDarkMode
@@ -186,7 +201,7 @@ export default function Home() {
     const loadDashboard = async () => {
       const token = await getToken();
       if (!token) {
-        Alert.alert("Session Expired", "Please log in again.");
+        Alert.alert(t.session_expired_title, t.session_expired_msg);
         navigation.dispatch(StackActions.replace("Login"));
         return;
       }
@@ -199,10 +214,10 @@ export default function Home() {
     setMenuVisible(false);
     try {
       await removeToken();
-      Alert.alert("Logged Out", "You have been successfully signed out.");
+      Alert.alert(t.logged_out_title, t.logged_out_msg);
       navigation.dispatch(StackActions.replace("Login"));
     } catch (e) {
-      Alert.alert("Error", "Failed to complete sign out process.");
+      Alert.alert(t.logout_error_title, t.logout_error_msg);
     }
   }, [navigation]);
 
@@ -241,7 +256,7 @@ export default function Home() {
 
   async function generateFullReport() {
     if (!history.length) {
-      alert("No history entries to report.");
+      alert(t.no_report_data);
       return;
     }
 
@@ -260,9 +275,11 @@ export default function Home() {
           </style>
         </head>
         <body>
-          <h1>MS Symptom Report</h1>
-          <p><strong>User:</strong> ${USER}</p>
-          <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+          <h1>${t.header_title}</h1>
+          <p><strong>${t.report_user_label}</strong> ${USER}</p>
+          <p><strong>${
+            t.report_generated_label
+          }</strong> ${new Date().toLocaleString()}</p>
 
           ${Object.keys(groupedByMonth)
             .sort((a, b) => b.localeCompare(a))
@@ -288,17 +305,19 @@ export default function Home() {
               const symptomNamesMonth = Object.keys(symptomMapMonth);
               const avgPainPerSymptomMonth = symptomNamesMonth.map((name) => {
                 const scores = symptomMapMonth[name];
-                return (
-                  scores.reduce((sum, s) => sum + s, 0) / scores.length
-                );
+                return scores.reduce((sum, s) => sum + s, 0) / scores.length;
               });
 
               return `
                 <h2>${monthName} ${year}</h2>
                 <div class="summary">
-                  <p><strong>Total entries:</strong> ${entries.length}</p>
-                  <p><strong>Average pain score:</strong> ${avgPain}</p>
-                  <p><strong>Average hours affected:</strong> ${avgHours}</p>
+                  <p><strong>${t.report_entries_label}</strong> ${
+                entries.length
+              }</p>
+                  <p><strong>${t.report_avg_pain_label}</strong> ${avgPain}</p>
+                  <p><strong>${
+                    t.report_avg_hours_label
+                  }</strong> ${avgHours}</p>
                 </div>
                 <div class="chart">
                   <img src="https://quickchart.io/chart?c={
@@ -370,7 +389,7 @@ export default function Home() {
               variant="titleMedium"
               style={{ fontWeight: "bold", color: textColor }}
             >
-              Symptom Diary ({language})
+              {t.header_title2} ({language})
             </Text>
 
             <Menu
@@ -403,11 +422,11 @@ export default function Home() {
                   setMenuVisible(false);
                   setIsSettingsModalVisible(true);
                 }}
-                title="Settings"
+                title={t.settings_menu}
               />
               <Menu.Item
                 onPress={handleLogout}
-                title="Log Out"
+                title={t.logout_menu}
                 titleStyle={{ color: "#b3261e" }}
               />
             </Menu>
@@ -430,7 +449,7 @@ export default function Home() {
                     }}
                     onPress={() => setMonthMenuVisible(true)}
                   >
-                    Month: {monthNames[selectedMonth]}
+                    {t.month_prefix} {monthNames[selectedMonth]}
                   </Button>
                 }
               >
@@ -463,7 +482,7 @@ export default function Home() {
                     }}
                     onPress={() => setYearMenuVisible(true)}
                   >
-                    Year: {selectedYear}
+                    {t.year_prefix} {selectedYear}
                   </Button>
                 }
               >
@@ -508,8 +527,7 @@ export default function Home() {
                       backgroundGradientFrom: "#ffffff",
                       backgroundGradientTo: "#ffffff",
                       decimalPlaces: 1,
-                      color: (opacity = 1) =>
-                        `rgba(0, 123, 255, ${opacity})`,
+                      color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
                     }}
                     style={{ borderRadius: 16 }}
@@ -535,7 +553,7 @@ export default function Home() {
               onPress={generateFullReport}
               textColor="#ffffff"
             >
-              Download Full History PDF Report
+              {t.download_report_btn}
             </Button>
 
             <Button
@@ -549,7 +567,7 @@ export default function Home() {
               mode="outlined"
               textColor="#000000"
             >
-              Add Symptom Log (use Log tab)
+              {t.add_log_btn}
             </Button>
           </ScrollView>
         </View>
