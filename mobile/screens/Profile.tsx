@@ -13,6 +13,10 @@ import {
 import { Text as PaperText, TextInput, HelperText } from "react-native-paper";
 import { BASE } from "../lib/api";
 
+import { useSettings } from "../utils/SettingsContext";
+
+import { getTranslations } from "../utils/translations";
+
 const bg = require("../assets/bg-screens.png");
 
 type User = {
@@ -54,6 +58,18 @@ export default function Profile() {
   const canSave =
     validEmail && validDoctor && validDate && validMobile && !saving;
 
+  // CONSUME GLOBAL SETTINGS
+  // This hook forces the component to re-render whenever settings change in Home.tsx
+  const { isDarkMode, language } = useSettings();
+
+  // DERIVE STYLES FROM SETTINGS
+  const backgroundColor = isDarkMode ? "#121212" : "#f5f5f5";
+  const textColor = isDarkMode ? "#ffffff" : "#000000";
+  const dividerColor = isDarkMode ? "#333333" : "#e0e0e0";
+
+  // Use of helper function to get translations
+  const t = getTranslations(language);
+
   // --- fetch user data (demo user for now) ---
   useEffect(() => {
     const username = "demo"; // TODO: replace with auth user
@@ -90,10 +106,7 @@ export default function Profile() {
   // --- save user updates ---
   const save = async () => {
     if (!canSave) {
-      Alert.alert(
-        "Validation",
-        "Please fill all required fields correctly."
-      );
+      Alert.alert("Validation", "Please fill all required fields correctly.");
       return;
     }
 
@@ -189,7 +202,7 @@ export default function Profile() {
           left={<TextInput.Icon icon="phone" />}
         />
         <HelperText type={validMobile ? "info" : "error"} visible>
-          {validMobile ? " " : "Phone between 7-15 digits" }
+          {validMobile ? " " : "Phone between 7-15 digits"}
         </HelperText>
 
         <TextInput
@@ -232,9 +245,7 @@ export default function Profile() {
             !canSave && { opacity: 0.6 },
           ]}
         >
-          <Text style={styles.ctaBtnText}>
-            {saving ? "Saving..." : "Save"}
-          </Text>
+          <Text style={styles.ctaBtnText}>{saving ? "Saving..." : "Save"}</Text>
         </Pressable>
 
         <View style={{ height: 24 }} />

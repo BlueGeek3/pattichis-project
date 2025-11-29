@@ -21,6 +21,10 @@ import {
 import { Calendar, type DateData } from "react-native-calendars";
 import { listHistory } from "../lib/api";
 
+import { useSettings } from "../utils/SettingsContext";
+
+import { getTranslations } from "../utils/translations";
+
 const USER = "demo";
 const bg = require("../assets/bg-screens.png");
 
@@ -44,6 +48,18 @@ export default function History() {
   const [err, setErr] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
+
+  // CONSUME GLOBAL SETTINGS
+  // This hook forces the component to re-render whenever settings change in Home.tsx
+  const { isDarkMode, language } = useSettings();
+
+  // DERIVE STYLES FROM SETTINGS
+  const backgroundColor = isDarkMode ? "#121212" : "#f5f5f5";
+  const textColor = isDarkMode ? "#ffffff" : "#000000";
+  const dividerColor = isDarkMode ? "#333333" : "#e0e0e0";
+
+  // Use of helper function to get translations
+  const t = getTranslations(language);
 
   // ---- Load data ---------------------------------------------------------
   const load = async () => {
@@ -101,9 +117,7 @@ export default function History() {
   // ---- Filtered list for selected date -----------------------------------
   const displayItems = useMemo(
     () =>
-      selectedDate
-        ? items.filter((i) => i.dateKey === selectedDate)
-        : items,
+      selectedDate ? items.filter((i) => i.dateKey === selectedDate) : items,
     [items, selectedDate]
   );
 
@@ -170,9 +184,7 @@ export default function History() {
               data={displayItems}
               keyExtractor={(i) => String(i.id)}
               ListEmptyComponent={
-                <PaperText style={{ padding: 16 }}>
-                  No logs yet.
-                </PaperText>
+                <PaperText style={{ padding: 16 }}>No logs yet.</PaperText>
               }
               renderItem={({ item }) => (
                 <Pressable onPress={() => setSelectedItem(item)}>
@@ -219,10 +231,7 @@ export default function History() {
                       styles.painBarFill,
                       {
                         width: `${
-                          Math.max(
-                            0,
-                            Math.min(10, selectedItem.painScore)
-                          ) * 10
+                          Math.max(0, Math.min(10, selectedItem.painScore)) * 10
                         }%`,
                       },
                     ]}

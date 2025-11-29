@@ -15,6 +15,10 @@ import {
   createBloodPressure,
 } from "../lib/api";
 
+import { useSettings } from "../utils/SettingsContext";
+
+import { getTranslations } from "../utils/translations";
+
 const USER = "demo";
 const bg = require("../assets/bg-screens.png");
 
@@ -32,11 +36,21 @@ export default function Log() {
   const { height } = useWindowDimensions();
   const topPad = height * 0.08;
 
+  // CONSUME GLOBAL SETTINGS
+  // This hook forces the component to re-render whenever settings change in Home.tsx
+  const { isDarkMode, language } = useSettings();
+
+  // DERIVE STYLES FROM SETTINGS
+  const backgroundColor = isDarkMode ? "#121212" : "#f5f5f5";
+  const textColor = isDarkMode ? "#ffffff" : "#000000";
+  const dividerColor = isDarkMode ? "#333333" : "#e0e0e0";
+
+  // Use of helper function to get translations
+  const t = getTranslations(language);
+
   // Load symptoms on mount
   useEffect(() => {
-    listSymptoms()
-      .then(setSymptoms)
-      .catch(console.error);
+    listSymptoms().then(setSymptoms).catch(console.error);
   }, []);
 
   const submit = async () => {
