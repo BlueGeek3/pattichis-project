@@ -47,8 +47,8 @@ const SettingsModal = ({ isVisible, onClose }) => {
   const t = getTranslations(language);
   // --------------------------------
 
-  const modalBackground = isDarkMode ? "#1e1e1e" : "white";
-  const textColor = isDarkMode ? "white" : "#000000";
+  const modalBackground = isDarkMode ? "#1e1e1e" : "#ffffff";
+  const textColor = isDarkMode ? "#ffffff" : "#000000";
   const dividerColor = isDarkMode ? "#333" : "#ccc";
 
   return (
