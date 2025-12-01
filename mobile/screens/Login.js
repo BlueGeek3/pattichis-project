@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   ScrollView,
+  ImageBackground,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import GlobalStyles from "../Styles/GlobalStyles";
@@ -18,6 +19,8 @@ import GlobalStyles from "../Styles/GlobalStyles";
 import { saveUsername } from "../utils/authStorage";
 
 import { USER_IP } from "../lib/api";
+
+const bg = require("../assets/bg-screens.png");
 
 // Get user IP address
 const API_URL = `${USER_IP}/login.php`;
@@ -124,80 +127,90 @@ export default function Login() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      KeyboardAvoidingView
-    >
-      <ScrollView
-        contentContainerStyle={GlobalStyles.container}
-        keyboardShouldPersistTaps="handled"
+    <ImageBackground source={bg} style={GlobalStyles.bg} resizeMode="cover">
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        KeyboardAvoidingView
       >
-        <Text style={GlobalStyles.header}>Welcome Back!</Text>
-
-        {/* Username Input Group */}
-        <View style={GlobalStyles.fieldGroup}>
-          <Text style={GlobalStyles.label}>Username</Text>
-          <TextInput
-            style={GlobalStyles.input}
-            placeholder="Enter your username"
-            placeholderTextColor="#9ca3af"
-            value={username}
-            onChangeText={setUsername}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-
-        {/* Password Input Group */}
-        <View style={GlobalStyles.fieldGroup}>
-          <Text style={GlobalStyles.label}>Password</Text>
-          <TextInput
-            style={GlobalStyles.input}
-            placeholder="Enter your password"
-            placeholderTextColor="#9ca3af"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={true}
-          />
-        </View>
-
-        {/* Message Display (Feedback) */}
-        {message ? (
-          <Text
-            style={[
-              GlobalStyles.message,
-              { color: message.includes("successful") ? "#10b981" : "#ef4444" },
-            ]}
-          >
-            {message}
-          </Text>
-        ) : null}
-
-        {/* Login Button */}
-        <TouchableOpacity
-          style={GlobalStyles.loginButton}
-          onPress={handleLogin}
-          disabled={isLoading}
+        <ScrollView
+          contentContainerStyle={GlobalStyles.scrollViewContent} //{GlobalStyles.container}
+          keyboardShouldPersistTaps="handled"
         >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={GlobalStyles.loginButtonText}>LOG IN</Text>
-          )}
-        </TouchableOpacity>
+          <View style={GlobalStyles.formCard}>
+            <Text style={GlobalStyles.header}>Welcome Back!</Text>
 
-        {/* Footer Links (Forgot Password & Register) */}
-        <View style={GlobalStyles.footerLinks}>
-          <TouchableOpacity onPress={handleForgotPassword}>
-            <Text style={GlobalStyles.linkText}>Forgot Password?</Text>
-          </TouchableOpacity>
+            {/* Username Input Group */}
+            <View style={GlobalStyles.fieldGroup}>
+              <Text style={GlobalStyles.label}>Username</Text>
+              <TextInput
+                style={GlobalStyles.input}
+                placeholder="Enter your username"
+                placeholderTextColor="#9ca3af"
+                value={username}
+                onChangeText={setUsername}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-          <TouchableOpacity onPress={() => navigation.navigate("Registration")}>
-            <Text style={GlobalStyles.linkText}>New User? Register</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            {/* Password Input Group */}
+            <View style={GlobalStyles.fieldGroup}>
+              <Text style={GlobalStyles.label}>Password</Text>
+              <TextInput
+                style={GlobalStyles.input}
+                placeholder="Enter your password"
+                placeholderTextColor="#9ca3af"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={true}
+              />
+            </View>
+
+            {/* Message Display (Feedback) */}
+            {message ? (
+              <Text
+                style={[
+                  GlobalStyles.message,
+                  {
+                    color: message.includes("successful")
+                      ? "#10b981"
+                      : "#ef4444",
+                  },
+                ]}
+              >
+                {message}
+              </Text>
+            ) : null}
+
+            {/* Login Button */}
+            <TouchableOpacity
+              style={GlobalStyles.loginButton}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={GlobalStyles.loginButtonText}>LOG IN</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Footer Links (Forgot Password & Register) */}
+            <View style={GlobalStyles.footerLinks}>
+              <TouchableOpacity onPress={handleForgotPassword}>
+                <Text style={GlobalStyles.linkText}>Forgot Password?</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Registration")}
+              >
+                <Text style={GlobalStyles.linkText}>New User? Register</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }

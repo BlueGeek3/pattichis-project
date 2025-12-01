@@ -8,10 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ImageBackground,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import GlobalStyles from "../Styles/GlobalStyles";
 import { USER_IP } from "../lib/api";
+
+const bg = require("../assets/bg-screens.png");
 
 //Get user IP Address
 const API_URL = `${USER_IP}/registration.php`;
@@ -225,119 +228,127 @@ const Registration = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      KeyboardAvoidingView
-    >
-      <ScrollView
-        contentContainerStyle={GlobalStyles.container}
-        keyboardShouldPersistTaps="handled"
+    <ImageBackground source={bg} style={GlobalStyles.bg} resizeMode="cover">
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        KeyboardAvoidingView
       >
-        <Text style={GlobalStyles.title}>Create Your Account</Text>
-
-        {/* Message Display for success/error/validation */}
-        <Text
-          style={[
-            GlobalStyles.message,
-            {
-              color: message.includes("successful")
-                ? "green"
-                : message.length > 0
-                ? "red"
-                : "transparent",
-            },
-          ]}
+        <ScrollView
+          contentContainerStyle={GlobalStyles.scrollViewContent} //{GlobalStyles.container}
+          keyboardShouldPersistTaps="handled"
         >
-          {message}
-        </Text>
-        {/* --- Username Field Group --- */}
-        <View style={GlobalStyles.fieldGroup}>
-          <Text style={GlobalStyles.label}>Username</Text>
-          <TextInput
-            style={[GlobalStyles.input, getInputStyle("username")]}
-            placeholder="Username"
-            onChangeText={handleUsernameChange}
-            autoCapitalize="none"
-          />
-          {!!validationErrors.username && (
-            <Text style={GlobalStyles.errorText}>
-              {validationErrors.username}
+          <View style={GlobalStyles.formCard}>
+            <Text style={GlobalStyles.title}>Create Your Account</Text>
+
+            {/* Message Display for success/error/validation */}
+            <Text
+              style={[
+                GlobalStyles.message,
+                {
+                  color: message.includes("successful")
+                    ? "green"
+                    : message.length > 0
+                    ? "red"
+                    : "transparent",
+                },
+              ]}
+            >
+              {message}
             </Text>
-          )}
-        </View>
+            {/* --- Username Field Group --- */}
+            <View style={GlobalStyles.fieldGroup}>
+              <Text style={GlobalStyles.label}>Username</Text>
+              <TextInput
+                style={[GlobalStyles.input, getInputStyle("username")]}
+                placeholder="Username"
+                onChangeText={handleUsernameChange}
+                autoCapitalize="none"
+              />
+              {!!validationErrors.username && (
+                <Text style={GlobalStyles.errorText}>
+                  {validationErrors.username}
+                </Text>
+              )}
+            </View>
 
-        {/* --- Password Field Group --- */}
-        <View style={GlobalStyles.fieldGroup}>
-          <Text style={GlobalStyles.label}>Password</Text>
-          <TextInput
-            style={[GlobalStyles.input, getInputStyle("password")]}
-            placeholder="Password (min 6 characters)"
-            value={password}
-            onChangeText={handlePasswordChange}
-            secureTextEntry
-            autoCapitalize="none"
-          />
-          {!!validationErrors.password && (
-            <Text style={GlobalStyles.errorText}>
-              {validationErrors.password}
-            </Text>
-          )}
-        </View>
+            {/* --- Password Field Group --- */}
+            <View style={GlobalStyles.fieldGroup}>
+              <Text style={GlobalStyles.label}>Password</Text>
+              <TextInput
+                style={[GlobalStyles.input, getInputStyle("password")]}
+                placeholder="Password (min 6 characters)"
+                value={password}
+                onChangeText={handlePasswordChange}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+              {!!validationErrors.password && (
+                <Text style={GlobalStyles.errorText}>
+                  {validationErrors.password}
+                </Text>
+              )}
+            </View>
 
-        {/* --- Confirm Password Field Group --- */}
-        <View style={GlobalStyles.fieldGroup}>
-          <Text style={GlobalStyles.label}>Confirm Password</Text>
-          <TextInput
-            style={[GlobalStyles.input, getInputStyle("retypedPass")]}
-            placeholder="Password (min 6 characters)"
-            value={retypedPass}
-            onChangeText={handleRetypedPassChange}
-            secureTextEntry
-            autoCapitalize="none"
-          />
-          {!!validationErrors.retypedPass && (
-            <Text style={GlobalStyles.errorText}>
-              {validationErrors.retypedPass}
-            </Text>
-          )}
-        </View>
+            {/* --- Confirm Password Field Group --- */}
+            <View style={GlobalStyles.fieldGroup}>
+              <Text style={GlobalStyles.label}>Confirm Password</Text>
+              <TextInput
+                style={[GlobalStyles.input, getInputStyle("retypedPass")]}
+                placeholder="Password (min 6 characters)"
+                value={retypedPass}
+                onChangeText={handleRetypedPassChange}
+                secureTextEntry
+                autoCapitalize="none"
+              />
+              {!!validationErrors.retypedPass && (
+                <Text style={GlobalStyles.errorText}>
+                  {validationErrors.retypedPass}
+                </Text>
+              )}
+            </View>
 
-        {/* --- Email Field Group --- */}
-        <View style={GlobalStyles.fieldGroup}>
-          <Text style={GlobalStyles.label}>Email Address</Text>
-          <TextInput
-            style={[GlobalStyles.input, getInputStyle("email")]}
-            placeholder="Email Address"
-            value={email}
-            onChangeText={handleEmailChange}
-            keyboardType="email-address" // Hint to the mobile OS to show an email keyboard
-            autoCapitalize="none"
-          />
-          {!!validationErrors.email && (
-            <Text style={GlobalStyles.errorText}>{validationErrors.email}</Text>
-          )}
-        </View>
+            {/* --- Email Field Group --- */}
+            <View style={GlobalStyles.fieldGroup}>
+              <Text style={GlobalStyles.label}>Email Address</Text>
+              <TextInput
+                style={[GlobalStyles.input, getInputStyle("email")]}
+                placeholder="Email Address"
+                value={email}
+                onChangeText={handleEmailChange}
+                keyboardType="email-address" // Hint to the mobile OS to show an email keyboard
+                autoCapitalize="none"
+              />
+              {!!validationErrors.email && (
+                <Text style={GlobalStyles.errorText}>
+                  {validationErrors.email}
+                </Text>
+              )}
+            </View>
 
-        <TouchableOpacity
-          style={GlobalStyles.button}
-          onPress={handleRegistration}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={GlobalStyles.buttonText}>REGISTER</Text>
-          )}
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={GlobalStyles.registrationButton}
+              onPress={handleRegistration}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={GlobalStyles.registrationButtonText}>
+                  REGISTER
+                </Text>
+              )}
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={GlobalStyles.linkText}>
-            Already have an account? Login here.
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              <Text style={GlobalStyles.linkText}>
+                Already have an account? Login here.
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 

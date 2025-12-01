@@ -1,6 +1,29 @@
 import { StyleSheet } from "react-native";
 
 const GlobalStyles = StyleSheet.create({
+  // 1. New style for the ScrollView content container
+  // It centers the content (your Form Card) vertically.
+  scrollViewContent: {
+    flexGrow: 1, // Allows content to fill space for centering
+    justifyContent: "center", // Centers the card vertically
+    paddingHorizontal: 20, // Padding from the screen edges
+  },
+  // 2. The new 'Card' style for the form content itself
+  formCard: {
+    // 50% opaque background
+    backgroundColor: "#CDE2FF",
+    //backgroundColor: "#9ac4b680",
+    padding: 24, // Internal padding for the card
+    borderRadius: 12, // Nice rounded corners
+    width: "100%",
+    maxWidth: 450, // Limits width on tablets/desktops
+    alignSelf: "center", // Centers the card horizontally
+  },
+
+  // Your existing styles (ensure 'bg' is defined for the ImageBackground)
+  bg: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -17,7 +40,8 @@ const GlobalStyles = StyleSheet.create({
   header: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#1f2937",
+    //color: "#1f2937",
+    color: "#fff", // White text for better contrast on the card
     marginBottom: 30,
     marginTop: 50,
   },
@@ -27,14 +51,16 @@ const GlobalStyles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    //color: "#333",
+    color: "#fff", // Light text for better contrast
     marginBottom: 5,
     paddingLeft: 5,
   },
   input: {
     width: "100%",
     height: 50,
-    backgroundColor: "#ffffff",
+    //backgroundColor: "#ffffff",
+    backgroundColor: "#fff", // Keep inputs opaque white for easy typing
     borderColor: "#d1d5db",
     borderWidth: 1,
     borderRadius: 12,
@@ -59,17 +85,22 @@ const GlobalStyles = StyleSheet.create({
     paddingLeft: 5,
     fontWeight: "500",
   },
-  button: {
-    backgroundColor: "#007AFF", // Standard iOS blue
+  registrationButton: {
+    //backgroundColor: "#007AFF", // Standard iOS blue
+    backgroundColor: "#FFCDFB",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 20,
   },
-  buttonText: {
-    color: "#fff",
+  registrationButtonText: {
+    //color: "#fff",
+    color: "#CDFFD1",
     fontSize: 18,
     fontWeight: "600",
+    textShadowColor: "#000000ff",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   message: {
     textAlign: "center",
@@ -87,7 +118,8 @@ const GlobalStyles = StyleSheet.create({
   loginButton: {
     width: "100%",
     paddingVertical: 14,
-    backgroundColor: "#1d4ed8", // A deep blue color
+    //backgroundColor: "#1d4ed8", // A deep blue color
+    backgroundColor: "#1f2937", // Dark button for contrast
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
