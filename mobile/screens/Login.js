@@ -17,9 +17,10 @@ import GlobalStyles from "../Styles/GlobalStyles";
 // Import the saveUsername function from your new utility file
 import { saveUsername } from "../utils/authStorage";
 
-// IMPORTANT: REPLACE 'YOUR_ACTUAL_IP_ADDRESS' below with the IP from ipconfig/System Settings.
-// ----------------------------------------------------------------------
-const API_URL = "http://192.168.10.10:8080/login.php";
+import { USER_IP } from "../lib/api";
+
+// Get user IP address
+const API_URL = `${USER_IP}/login.php`;
 
 export default function Login() {
   const navigation = useNavigation();
@@ -36,7 +37,7 @@ export default function Login() {
   const handleForgotPassword = () => {
     Alert.alert(
       "Reset Password Instructions", // Title
-      "To reset your password, please contact your administrator or email support@example.com.\n\nWe will send you a temporary password shortly.", // Message
+      "To reset your password, please contact your administrator or email support@mssymptomdiary.com.\n\nWe will send you a temporary password shortly.", // Message
       [
         {
           text: "Cancel",

@@ -3,6 +3,7 @@ import { Platform, NativeModules } from "react-native";
 import Constants from "expo-constants";
 
 const PORT = 3000;
+const PORT2 = 8080;
 
 /** Discover the dev machine host so Expo Go can reach your backend. */
 function detectHost(): string {
@@ -36,7 +37,7 @@ function detectHost(): string {
 
   // 3) Emulators fallbacks
   if (Platform.OS === "android") return "10.0.2.2"; // Android emulator
-  if (Platform.OS === "ios") return "localhost";     // iOS simulator
+  if (Platform.OS === "ios") return "localhost"; // iOS simulator
 
   // 4) Worst-case fallback
   return "localhost";
@@ -44,6 +45,7 @@ function detectHost(): string {
 
 const HOST = detectHost();
 export const BASE = `http://${HOST}:${PORT}/ms-api`;
+export const USER_IP = `http://${HOST}:${PORT2}`;
 
 async function handle<T>(res: Response, path: string): Promise<T> {
   const text = await res.text();
@@ -91,27 +93,42 @@ export const getUser = (username: string) =>
 
 export const updateUser = (
   username: string,
-  payload: { Email: string; MobileNumber: string; DateOfBirth: string; DoctorsEmail: string }
-) => apiPut<{ ok: boolean }>(`/user?username=${encodeURIComponent(username)}`, payload);
+  payload: {
+    Email: string;
+    MobileNumber: string;
+    DateOfBirth: string;
+    DoctorsEmail: string;
+  }
+) =>
+  apiPut<{ ok: boolean }>(
+    `/user?username=${encodeURIComponent(username)}`,
+    payload
+  );
 
 export const listSymptoms = () => apiGet<any[]>("/symptoms");
-export const listHistory  = (u: string) => apiGet<any[]>(`/history?username=${encodeURIComponent(u)}`);
+export const listHistory = (u: string) =>
+  apiGet<any[]>(`/history?username=${encodeURIComponent(u)}`);
 export const listHistoryLastWeek = (u: string) =>
   apiGet<any[]>(`/history/last-week?username=${encodeURIComponent(u)}`);
 
-export const listLogDates = (u: string) => apiGet<string[]>(`/dates?username=${encodeURIComponent(u)}`);
-export const createLog    = (p:{username:string;date:string;hours:number;painScore:number;symptomId:number;}) =>
-  apiPost<{ok:boolean;id:number}>("/log", p);
-export const createRating = (p:{username:string;date:string;rating:number;}) =>
-  apiPost<{ok:boolean;daily_id:number}>("/rating", p);
+export const listLogDates = (u: string) =>
+  apiGet<string[]>(`/dates?username=${encodeURIComponent(u)}`);
+export const createLog = (p: {
+  username: string;
+  date: string;
+  hours: number;
+  painScore: number;
+  symptomId: number;
+}) => apiPost<{ ok: boolean; id: number }>("/log", p);
+export const createRating = (p: {
+  username: string;
+  date: string;
+  rating: number;
+}) => apiPost<{ ok: boolean; daily_id: number }>("/rating", p);
 export const createBloodPressure = (p: {
   username: string;
   systolic: string;
   diastolic: string;
-  date: string;       // yyyy-mm-dd
+  date: string; // yyyy-mm-dd
 }) =>
-  apiPost<{ message: string; insertId: number | null }>(
-    "/bloodpressure",
-    p
-  );
-
+  apiPost<{ message: string; insertId: number | null }>("/bloodpressure", p);
