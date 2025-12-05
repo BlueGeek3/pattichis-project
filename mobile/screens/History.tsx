@@ -61,10 +61,11 @@ export default function History() {
   // This hook forces the component to re-render whenever settings change in Home.tsx
   const { isDarkMode, language } = useSettings();
 
-  // DERIVE STYLES FROM SETTINGS
-  const backgroundColor = isDarkMode ? "#121212" : "#f5f5f5";
-  const textColor = isDarkMode ? "#ffffff" : "#000000";
-  const dividerColor = isDarkMode ? "#333333" : "#e0e0e0";
+  // Dark Mode Colors
+  const themeBackgroundOverlay = isDarkMode
+    ? "rgba(0, 0, 0, 0.35)"
+    : "transparent";
+  const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
 
   // Use of helper function to get translations
   const t = getTranslations(language);
@@ -156,8 +157,18 @@ export default function History() {
   // ---- Render ------------------------------------------------------------
   return (
     <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
-      <View style={[styles.container, { paddingTop: topPad }]}>
-        <PaperText variant="headlineSmall" style={styles.title}>
+      <View
+        style={[
+          styles.container,
+          // Added dark mode color
+          { paddingTop: topPad, backgroundColor: themeBackgroundOverlay },
+        ]}
+      >
+        <PaperText
+          variant="headlineSmall"
+          // Added dark mode color
+          style={(styles.title, { color: textColor })}
+        >
           History
         </PaperText>
 

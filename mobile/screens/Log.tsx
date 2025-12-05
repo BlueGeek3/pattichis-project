@@ -48,10 +48,10 @@ export default function Log() {
   // This hook forces the component to re-render whenever settings change in Home.tsx
   const { isDarkMode, language } = useSettings();
 
-  // DERIVE STYLES FROM SETTINGS
-  const backgroundColor = isDarkMode ? "#121212" : "#f5f5f5";
-  const textColor = isDarkMode ? "#ffffff" : "#000000";
-  const dividerColor = isDarkMode ? "#333333" : "#e0e0e0";
+  // Dark Mode Colors
+  const themeBackgroundOverlay = isDarkMode
+    ? "rgba(0, 0, 0, 0.35)"
+    : "transparent";
 
   // Use of helper function to get translations
   const t = getTranslations(language);
@@ -130,7 +130,12 @@ export default function Log() {
       <ScrollView
         contentContainerStyle={[
           styles.container,
-          { paddingTop: topPad, paddingBottom: 24 },
+          // Added Dark Mode Color
+          {
+            paddingTop: topPad,
+            paddingBottom: 24,
+            backgroundColor: themeBackgroundOverlay,
+          },
         ]}
         keyboardShouldPersistTaps="handled"
       >

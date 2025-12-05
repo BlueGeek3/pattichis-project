@@ -68,10 +68,11 @@ export default function Profile() {
   // This hook forces the component to re-render whenever settings change in Home.tsx
   const { isDarkMode, language } = useSettings();
 
-  // DERIVE STYLES FROM SETTINGS
-  const backgroundColor = isDarkMode ? "#121212" : "#f5f5f5";
-  const textColor = isDarkMode ? "#ffffff" : "#000000";
-  const dividerColor = isDarkMode ? "#333333" : "#e0e0e0";
+  // Dark Mode Colors
+  const themeBackgroundOverlay = isDarkMode
+    ? "rgba(0, 0, 0, 0.35)"
+    : "transparent";
+  const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
 
   // Use of helper function to get translations
   const t = getTranslations(language);
@@ -175,10 +176,18 @@ export default function Profile() {
   return (
     <ImageBackground source={bg} style={styles.bg} resizeMode="cover">
       <ScrollView
-        contentContainerStyle={[styles.container, { paddingTop: topPad }]}
+        contentContainerStyle={[
+          // Added Dark Mode Color
+          styles.container,
+          { paddingTop: topPad, backgroundColor: themeBackgroundOverlay },
+        ]}
         keyboardShouldPersistTaps="handled"
       >
-        <PaperText variant="headlineSmall" style={styles.title}>
+        <PaperText
+          variant="headlineSmall"
+          // Added Dark Mode Color
+          style={(styles.title, { color: textColor })}
+        >
           Profile
         </PaperText>
 
@@ -272,7 +281,8 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
-  container: { paddingHorizontal: 16 },
+  // Added flexGrow to cover whole screen when dark mode is enabled
+  container: { flexGrow: 1, paddingHorizontal: 16 },
   title: { marginBottom: 8, fontWeight: "700", color: "#2A2A2A" },
   input: { backgroundColor: "#FFFFFFE6" },
   usernameInput: { marginBottom: 28 },
