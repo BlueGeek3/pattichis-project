@@ -51,7 +51,14 @@ const SettingsModal = ({ isVisible, onClose }) => {
   const modalBackground = isDarkMode ? "#1e1e1e" : "#ffffff";
   const textColor = isDarkMode ? "#ffffff" : "#000000";
   const dividerColor = isDarkMode ? "#333" : "#ccc";
+  const currentLanguageColor = isDarkMode ? "#aaa" : "#666";
 
+  const SWITCH_COLORS = {
+    SWITCH_ON_COLOR: "#8F8F8F",
+    SWITCH_ON_THUMB: "#A9A9A9",
+    SWITCH_OFF_TRACK: "#FFC7C7",
+    SWITCH_OFF_THUMB: "#FFFAFA",
+  };
   return (
     <Portal>
       <Modal
@@ -79,7 +86,16 @@ const SettingsModal = ({ isVisible, onClose }) => {
             <Switch
               value={isDarkMode}
               onValueChange={toggleDarkMode}
-              color="#4A4A4A"
+              trackColor={{
+                false: SWITCH_COLORS.SWITCH_OFF_TRACK, // Track color when OFF (Light Mode)
+                true: SWITCH_COLORS.SWITCH_ON_COLOR, // Track color when ON (Dark Mode)
+              }}
+              // 2. Define the thumb (moving circle) colors for checked and unchecked
+              thumbColor={
+                isDarkMode
+                  ? SWITCH_COLORS.SWITCH_ON_THUMB // Thumb color when ON
+                  : SWITCH_COLORS.SWITCH_OFF_THUMB // Thumb color when OFF
+              }
             />
           )}
           style={{ paddingHorizontal: 0 }}
@@ -92,7 +108,7 @@ const SettingsModal = ({ isVisible, onClose }) => {
           title={t.language_title}
           titleStyle={{ color: textColor }}
           description={language}
-          descriptionStyle={{ color: isDarkMode ? "#aaa" : "#666" }}
+          descriptionStyle={{ color: currentLanguageColor }}
           right={() => (
             <Menu
               visible={languageMenuVisible}
