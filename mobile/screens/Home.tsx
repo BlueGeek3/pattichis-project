@@ -30,7 +30,7 @@ import { useNavigation, StackActions } from "@react-navigation/native";
 import { getUsername, removeUsername } from "../utils/authStorage";
 import { useSettings } from "../utils/SettingsContext";
 
-import { getTranslations, getMonthNames } from "../utils/translations";
+import { getHomeTranslations, getMonthNames } from "../utils/translations";
 
 //const USER = "demo";
 let USER = "demo";
@@ -45,7 +45,7 @@ const SettingsModal = ({ isVisible, onClose }) => {
   const [languageMenuVisible, setLanguageMenuVisible] = useState(false);
 
   // Use of helper function to get translations
-  const t = getTranslations(language);
+  const t = getHomeTranslations(language);
   // --------------------------------
 
   const modalBackground = isDarkMode ? "#1e1e1e" : "#ffffff";
@@ -184,7 +184,7 @@ export default function Home() {
   const [yearMenuVisible, setYearMenuVisible] = useState(false);
 
   // Use of helper functions to get translations
-  const t = getTranslations(language);
+  const t = getHomeTranslations(language);
   const monthNames = getMonthNames(language);
   // --------------------------------
 

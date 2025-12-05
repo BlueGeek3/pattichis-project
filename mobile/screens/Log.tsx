@@ -18,7 +18,7 @@ import {
 
 import { useSettings } from "../utils/SettingsContext";
 
-import { getTranslations } from "../utils/translations";
+import { getLogTranslations } from "../utils/translations";
 
 // Added imports to get global username
 import { getUsername } from "../utils/authStorage";
@@ -54,7 +54,7 @@ export default function Log() {
     : "transparent";
 
   // Use of helper function to get translations
-  const t = getTranslations(language);
+  const t = getLogTranslations(language);
 
   // Load symptoms on mount
   useEffect(() => {
@@ -75,11 +75,10 @@ export default function Log() {
   }, []);
 
   const submit = async () => {
-    if (!symptomId) return alert("Please choose a symptom");
-    if (Number(pain) < 0 || Number(pain) > 10)
-      return alert("Pain must be 0–10");
+    if (!symptomId) return alert(t.error_choose_symptom);
+    if (Number(pain) < 0 || Number(pain) > 10) return alert(t.error_pain_range);
     if (rating !== "" && (Number(rating) < 0 || Number(rating) > 10))
-      return alert("Daily rating must be 0–10");
+      return alert(t.error_rating_range);
 
     setLoading(true);
 
@@ -109,7 +108,7 @@ export default function Log() {
         });
       }
 
-      alert("Saved!");
+      alert(t.success_saved);
 
       setSymptomId("");
       setPain("5");
@@ -119,7 +118,7 @@ export default function Log() {
       setDiastolic("");
     } catch (err) {
       console.error(err);
-      alert("Error saving log");
+      alert(t.error_saving);
     } finally {
       setLoading(false);
     }
@@ -141,12 +140,12 @@ export default function Log() {
       >
         <View style={styles.card}>
           <Text variant="titleMedium" style={styles.title}>
-            New Symptom Log
+            {t.title}
           </Text>
 
           {/* DATE */}
           <TextInput
-            label="Date (YYYY-MM-DD)"
+            label={t.date_label}
             value={date}
             onChangeText={setDate}
             mode="outlined"
@@ -164,7 +163,7 @@ export default function Log() {
               }))}
               labelField="label"
               valueField="value"
-              placeholder="Select a symptom"
+              placeholder={t.select_symptom_placeholder}
               value={symptomId}
               onChange={(item) => setSymptomId(item.value)}
             />
@@ -173,7 +172,7 @@ export default function Log() {
           {/* ALL INPUTS BELOW MUST HAVE LOWER Z-INDEX */}
           <View style={{ zIndex: 1 }}>
             <TextInput
-              label="Pain (0–10)"
+              label={t.pain_label}
               value={pain}
               onChangeText={setPain}
               keyboardType="numeric"
@@ -182,7 +181,7 @@ export default function Log() {
             />
 
             <TextInput
-              label="Hours"
+              label={t.hours_label}
               value={hours}
               onChangeText={setHours}
               keyboardType="numeric"
@@ -191,7 +190,7 @@ export default function Log() {
             />
 
             <TextInput
-              label="Daily Rating (optional 0–10)"
+              label={t.daily_rating_label}
               value={rating}
               onChangeText={setRating}
               keyboardType="numeric"
@@ -200,7 +199,7 @@ export default function Log() {
             />
 
             <TextInput
-              label="Systolic Pressure"
+              label={t.systolic_label}
               value={systolic}
               onChangeText={setSystolic}
               keyboardType="numeric"
@@ -209,7 +208,7 @@ export default function Log() {
             />
 
             <TextInput
-              label="Diastolic Pressure"
+              label={t.diastolic_label}
               value={diastolic}
               onChangeText={setDiastolic}
               keyboardType="numeric"
@@ -226,7 +225,7 @@ export default function Log() {
             style={styles.saveButton}
             textColor="#ffffff"
           >
-            Save Log
+            {t.save_button}
           </Button>
         </View>
       </ScrollView>

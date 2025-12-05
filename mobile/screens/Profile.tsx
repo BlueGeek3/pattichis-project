@@ -15,7 +15,7 @@ import { BASE } from "../lib/api";
 
 import { useSettings } from "../utils/SettingsContext";
 
-import { getTranslations } from "../utils/translations";
+import { getProfileTranslations } from "../utils/translations";
 
 // Added imports to get global username
 import { getUsername } from "../utils/authStorage";
@@ -75,7 +75,7 @@ export default function Profile() {
   const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
 
   // Use of helper function to get translations
-  const t = getTranslations(language);
+  const t = getProfileTranslations(language);
 
   // --- fetch user data (demo user for now) ---
   useEffect(() => {
@@ -167,7 +167,7 @@ export default function Profile() {
             { paddingTop: topPad, alignItems: "center" },
           ]}
         >
-          <Text>Loading...</Text>
+          <Text>{t.loading}</Text>
         </View>
       </ImageBackground>
     );
@@ -188,11 +188,11 @@ export default function Profile() {
           // Added Dark Mode Color
           style={(styles.title, { color: textColor })}
         >
-          Profile
+          {t.screen_title}
         </PaperText>
 
         <TextInput
-          label="Username"
+          label={t.username_label}
           value={form.username}
           mode="outlined"
           style={[styles.input, styles.usernameInput]}
@@ -202,7 +202,7 @@ export default function Profile() {
         />
 
         <TextInput
-          label="Email"
+          label={t.email_label}
           value={form.email}
           onChangeText={(t) => onChange("email", t)}
           mode="outlined"
@@ -213,11 +213,11 @@ export default function Profile() {
           left={<TextInput.Icon icon="email" />}
         />
         <HelperText type={validEmail ? "info" : "error"} visible>
-          {validEmail ? " " : "Enter a valid email"}
+          {validEmail ? " " : t.valid_email_helper}
         </HelperText>
 
         <TextInput
-          label="Mobile Number"
+          label={t.mobile_label}
           value={form.mobileNumber}
           onChangeText={(t) => onChange("mobileNumber", t)}
           mode="outlined"
@@ -227,11 +227,11 @@ export default function Profile() {
           left={<TextInput.Icon icon="phone" />}
         />
         <HelperText type={validMobile ? "info" : "error"} visible>
-          {validMobile ? " " : "Phone between 7-15 digits"}
+          {validMobile ? " " : t.valid_mobile_helper}
         </HelperText>
 
         <TextInput
-          label="Date of Birth (YYYY-MM-DD)"
+          label={t.dob_label}
           value={form.dateOfBirth}
           onChangeText={(t) => onChange("dateOfBirth", t)}
           mode="outlined"
@@ -241,11 +241,11 @@ export default function Profile() {
           left={<TextInput.Icon icon="calendar" />}
         />
         <HelperText type={validDate ? "info" : "error"} visible>
-          {validDate ? " " : "Format must be YYYY-MM-DD"}
+          {validDate ? " " : t.valid_dob_helper}
         </HelperText>
 
         <TextInput
-          label="Doctor's Email"
+          label={t.doctor_email_label}
           value={form.doctorsEmail}
           onChangeText={(t) => onChange("doctorsEmail", t)}
           mode="outlined"
@@ -257,7 +257,7 @@ export default function Profile() {
           left={<TextInput.Icon icon="stethoscope" />}
         />
         <HelperText type={validDoctor ? "info" : "error"} visible>
-          {validDoctor ? " " : "Enter a valid email"}
+          {validDoctor ? " " : t.valid_email_helper}
         </HelperText>
 
         <View style={{ height: 8 }} />
@@ -270,7 +270,9 @@ export default function Profile() {
             !canSave && { opacity: 0.6 },
           ]}
         >
-          <Text style={styles.ctaBtnText}>{saving ? "Saving..." : "Save"}</Text>
+          <Text style={styles.ctaBtnText}>
+            {saving ? t.saving : t.save_button}
+          </Text>
         </Pressable>
 
         <View style={{ height: 24 }} />

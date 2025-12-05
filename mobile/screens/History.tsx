@@ -24,11 +24,11 @@ import { listHistory } from "../lib/api";
 
 import { useSettings } from "../utils/SettingsContext";
 
-import { getTranslations } from "../utils/translations";
-
 // Added imports to get global username
 import { getUsername } from "../utils/authStorage";
 import { useNavigation, StackActions } from "@react-navigation/native";
+
+import { getHistoryTranslations } from "../utils/translations";
 
 //const USER = "demo";
 let USER = "demo";
@@ -68,7 +68,7 @@ export default function History() {
   const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
 
   // Use of helper function to get translations
-  const t = getTranslations(language);
+  const t = getHistoryTranslations(language);
 
   // ---- Load data ---------------------------------------------------------
   const load = async () => {
@@ -169,13 +169,13 @@ export default function History() {
           // Added dark mode color
           style={(styles.title, { color: textColor })}
         >
-          History
+          {t.screen_title}
         </PaperText>
 
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator />
-            <PaperText style={{ marginTop: 8 }}>Loading…</PaperText>
+            <PaperText style={{ marginTop: 8 }}>{t.loading}}…</PaperText>
           </View>
         ) : (
           <>
@@ -191,7 +191,7 @@ export default function History() {
                     pressed && styles.ctaBtnPressed,
                   ]}
                 >
-                  <Text style={styles.ctaBtnText}>Retry</Text>
+                  <Text style={styles.ctaBtnText}>{t.retry}</Text>
                 </Pressable>
               </>
             ) : null}
@@ -217,21 +217,21 @@ export default function History() {
               data={displayItems}
               keyExtractor={(i) => String(i.id)}
               ListEmptyComponent={
-                <PaperText style={{ padding: 16 }}>No logs yet.</PaperText>
+                <PaperText style={{ padding: 16 }}>{t.no_logs}</PaperText>
               }
               renderItem={({ item }) => (
                 <Pressable onPress={() => setSelectedItem(item)}>
                   <View style={styles.logCard}>
                     <View style={styles.logHeaderRow}>
                       <PaperText style={styles.logSymptom}>
-                        {item.symptomName || "Symptom"}
+                        {item.symptomName || t.symptom_default}
                       </PaperText>
                       <PaperText style={styles.logPain}>
-                        Pain {item.painScore}/10
+                        {t.pain_label} {item.painScore}/10
                       </PaperText>
                     </View>
                     <PaperText style={styles.logMeta}>
-                      {item.date} • Hours: {item.hours}
+                      {item.date} • {t.hours_label}: {item.hours}
                     </PaperText>
                   </View>
                 </Pressable>
@@ -253,10 +253,10 @@ export default function History() {
             <>
               <Dialog.Title>{selectedItem.symptomName}</Dialog.Title>
               <Dialog.Content>
-                <PaperText>Date: {selectedItem.date}</PaperText>
-                <PaperText>Hours: {selectedItem.hours}</PaperText>
+                <PaperText>{t.date_label}: {selectedItem.date}</PaperText>
+                <PaperText>{t.hours_label}: {selectedItem.hours}</PaperText>
                 <PaperText style={{ marginTop: 8 }}>
-                  Pain score: {selectedItem.painScore}/10
+                  {t.pain_score_label}: {selectedItem.painScore}/10
                 </PaperText>
                 <View style={styles.painBarWrapper}>
                   <View
@@ -272,7 +272,7 @@ export default function History() {
                 </View>
               </Dialog.Content>
               <Dialog.Actions>
-                <Button onPress={() => setSelectedItem(null)}>Close</Button>
+                <Button onPress={() => setSelectedItem(null)}>{t.close_dialog}</Button>
               </Dialog.Actions>
             </>
           )}

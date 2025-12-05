@@ -13,6 +13,7 @@ import Registration from "./screens/Registration";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { SettingsProvider, useSettings } from "./utils/SettingsContext";
+import { getTabNamesTranslations } from "./utils/translations";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -24,6 +25,8 @@ function Tabs() {
   // Apply dynamic styling based on the global theme state
   const tabBarBackgroundColor = isDarkMode ? "#1e1e1e" : "#f8f8f8";
   const tabBarInactiveColor = isDarkMode ? "#888" : "#666";
+
+  const tabNames = getTabNamesTranslations(language);
 
   return (
     <Tab.Navigator
@@ -53,10 +56,26 @@ function Tabs() {
         tabBarActiveTintColor: "#007BFF", // Keep active color blue regardless of mode
       })}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="History" component={History} />
-      <Tab.Screen name="Log" component={Log} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen
+        name="Home"
+        component={Home}
+        options={{ tabBarLabel: tabNames.Home }}
+      />
+      <Tab.Screen
+        name="History"
+        component={History}
+        options={{ tabBarLabel: tabNames.History }}
+      />
+      <Tab.Screen
+        name="Log"
+        component={Log}
+        options={{ tabBarLabel: tabNames.Log }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{ tabBarLabel: tabNames.Profile }}
+      />
     </Tab.Navigator>
   );
 }
