@@ -41,7 +41,7 @@ const GlobalStyles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     //color: "#1f2937",
-    color: "#fff", // White text for better contrast on the card
+    color: "#000000ff", // White text for better contrast on the card
     marginBottom: 30,
     marginTop: 50,
   },
@@ -51,10 +51,15 @@ const GlobalStyles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    //color: "#333",
-    color: "#fff", // Light text for better contrast
+    //color: "#CDFFD1",
+    //color: "#fff", // Light text for better contrast
+    color: "#9AC4FF",
+    //color: "#FFEACD",
     marginBottom: 5,
     paddingLeft: 5,
+    textShadowColor: "#000000ff",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   input: {
     width: "100%",
@@ -86,16 +91,16 @@ const GlobalStyles = StyleSheet.create({
     fontWeight: "500",
   },
   registrationButton: {
-    //backgroundColor: "#007AFF", // Standard iOS blue
-    backgroundColor: "#FFCDFB",
+    backgroundColor: "#000000ff", // Standard iOS blue
+    //backgroundColor: "#FFCDFB",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 20,
   },
   registrationButtonText: {
-    //color: "#fff",
-    color: "#CDFFD1",
+    color: "#ffffffff",
+    //color: "#CDFFD1",
     fontSize: 18,
     fontWeight: "600",
     textShadowColor: "#000000ff",
