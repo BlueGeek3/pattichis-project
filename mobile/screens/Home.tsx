@@ -28,13 +28,119 @@ import { listHistory } from "../lib/api";
 import { useNavigation, StackActions, useFocusEffect } from "@react-navigation/native";
 import { getUsername, removeUsername } from "../utils/authStorage";
 import { useSettings } from "../utils/SettingsContext";
-
 import { getHomeTranslations, getMonthNames } from "../utils/translations";
 
 let USER = "demo";
 const AVAILABLE_LANGUAGES = ["English", "Greek"];
 const bg = require("../assets/bg-screens.png");
 
+// ------------------ Settings Modal ------------------
+const SettingsModal = ({ isVisible, onClose }) => {
+  const { isDarkMode, language, toggleDarkMode, setLanguage } = useSettings();
+  const [languageMenuVisible, setLanguageMenuVisible] = useState(false);
+  const t = getHomeTranslations(language);
+
+  const modalBackground = isDarkMode ? "#1e1e1e" : "#ffffff";
+  const textColor = isDarkMode ? "#ffffff" : "#000000";
+  const dividerColor = isDarkMode ? "#333" : "#ccc";
+  const currentLanguageColor = isDarkMode ? "#aaa" : "#666";
+
+  const SWITCH_COLORS = {
+    SWITCH_ON_COLOR: "#8F8F8F",
+    SWITCH_ON_THUMB: "#A9A9A9",
+    SWITCH_OFF_TRACK: "#FFC7C7",
+    SWITCH_OFF_THUMB: "#FFFAFA",
+  };
+
+  return (
+    <Portal>
+      <Modal
+        visible={isVisible}
+        onDismiss={onClose}
+        contentContainerStyle={{
+          backgroundColor: modalBackground,
+          padding: 20,
+          margin: 20,
+          borderRadius: 12,
+        }}
+      >
+        <Text variant="titleLarge" style={{ color: textColor, marginBottom: 20 }}>
+          {t.settings_title}
+        </Text>
+
+        {/* Dark Mode */}
+        <List.Item
+          title={t.dark_mode_title}
+          titleStyle={{ color: textColor }}
+          right={() => (
+            <Switch
+              value={isDarkMode}
+              onValueChange={toggleDarkMode}
+              trackColor={{
+                false: SWITCH_COLORS.SWITCH_OFF_TRACK,
+                true: SWITCH_COLORS.SWITCH_ON_COLOR,
+              }}
+              thumbColor={isDarkMode ? SWITCH_COLORS.SWITCH_ON_THUMB : SWITCH_COLORS.SWITCH_OFF_THUMB}
+            />
+          )}
+        />
+        <Divider style={{ backgroundColor: dividerColor }} />
+
+        {/* Language Selector */}
+        <List.Item
+          title={t.language_title}
+          titleStyle={{ color: textColor }}
+          description={language}
+          descriptionStyle={{ color: currentLanguageColor }}
+          right={() => (
+            <Menu
+              visible={languageMenuVisible}
+              onDismiss={() => setLanguageMenuVisible(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  textColor="#000"
+                  style={{
+                    marginTop: 8,
+                    borderColor: "#2A2A2A",
+                    borderWidth: 1,
+                    backgroundColor: "#FFFFFFE6",
+                  }}
+                  onPress={() => setLanguageMenuVisible(true)}
+                >
+                  {t.change_btn}
+                </Button>
+              }
+            >
+              {AVAILABLE_LANGUAGES.map((item) => (
+                <Menu.Item
+                  key={item}
+                  onPress={() => {
+                    setLanguage(item);
+                    setLanguageMenuVisible(false);
+                  }}
+                  title={item}
+                  style={{ backgroundColor: language === item ? "#e0f7fa" : "white" }}
+                />
+              ))}
+            </Menu>
+          )}
+        />
+
+        <Button
+          mode="contained"
+          onPress={onClose}
+          style={{ marginTop: 30, backgroundColor: "#4A4A4A", borderRadius: 24 }}
+          textColor="#ffffff"
+        >
+          {t.close_btn}
+        </Button>
+      </Modal>
+    </Portal>
+  );
+};
+
+// ------------------ Home Component ------------------
 export default function Home() {
   const navigation = useNavigation();
   const { isDarkMode, language } = useSettings();
@@ -44,6 +150,7 @@ export default function Home() {
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
   const [monthMenuVisible, setMonthMenuVisible] = useState(false);
   const [yearMenuVisible, setYearMenuVisible] = useState(false);
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
@@ -112,11 +219,9 @@ export default function Home() {
     datasets: [{ data: avgPainPerSymptom.length ? avgPainPerSymptom : [0] }],
   };
 
-  const themeBackgroundOverlay = isDarkMode
-    ? "rgba(0, 0, 0, 0.35)"
-    : "transparent";
+  const themeBackgroundOverlay = isDarkMode ? "rgba(0, 0, 0, 0.35)" : "transparent";
   const cardBackground = isDarkMode ? "#1e1e1e" : "#FFFFFFE6";
-  const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
+  const textColorHeader = isDarkMode ? "#ffffff" : "#2A2A2A";
   const headerBorder = isDarkMode ? "#333" : "#eee";
 
   // ----------------- PDF Report -----------------
@@ -161,12 +266,17 @@ export default function Home() {
               const monthIndex = Number(monthNum) - 1;
               const monthName = monthNames[monthIndex];
 
-              const avgPain = (entries.reduce((s, x) => s + x.painScore, 0) / entries.length).toFixed(1);
-              const avgHours = (entries.reduce((s, x) => s + x.hours, 0) / entries.length).toFixed(1);
+              const avgPain = (
+                entries.reduce((s, x) => s + x.painScore, 0) / entries.length
+              ).toFixed(1);
+              const avgHours = (
+                entries.reduce((s, x) => s + x.hours, 0) / entries.length
+              ).toFixed(1);
 
               const symptomMapMonth: Record<string, number[]> = {};
               entries.forEach((h) => {
-                if (!symptomMapMonth[h.symptomName]) symptomMapMonth[h.symptomName] = [];
+                if (!symptomMapMonth[h.symptomName])
+                  symptomMapMonth[h.symptomName] = [];
                 symptomMapMonth[h.symptomName].push(h.painScore);
               });
               const symptomNamesMonth = Object.keys(symptomMapMonth);
@@ -187,17 +297,21 @@ export default function Home() {
                     type:'bar',
                     data:{
                       labels:[${symptomNamesMonth.map((s) => `'${s}'`).join(",")}],
-                      datasets:[{label:'Avg Pain',data:[${avgPainPerSymptomMonth.join(",")}] }]
+                      datasets:[{label:'Avg Pain',data:[${avgPainPerSymptomMonth.join(",")}]}]
                     },
                     options:{plugins:{legend:{display:false}}}
                   }" />
                 </div>
                 <table>
                   <tr><th>Date</th><th>Symptom</th><th>Pain</th><th>Hours</th></tr>
-                  ${entries.map(h => `<tr><td>${h.date}</td><td>${h.symptomName}</td><td>${h.painScore}</td><td>${h.hours}</td></tr>`).join("")}
+                  ${entries.map(
+                    (h) =>
+                      `<tr><td>${h.date}</td><td>${h.symptomName}</td><td>${h.painScore}</td><td>${h.hours}</td></tr>`
+                  ).join("")}
                 </table>
               `;
-            }).join("")}
+            })
+            .join("")}
         </body>
       </html>
     `;
@@ -205,11 +319,15 @@ export default function Home() {
     const { uri } = await Print.printToFileAsync({ html });
     await Sharing.shareAsync(uri);
   };
-
   // -------------------------------------------
 
   return (
     <PaperProvider>
+      <SettingsModal
+        isVisible={isSettingsModalVisible}
+        onClose={() => setIsSettingsModalVisible(false)}
+      />
+
       <ImageBackground
         source={bg}
         resizeMode="cover"
@@ -217,23 +335,18 @@ export default function Home() {
       >
         <View style={{ flex: 1, backgroundColor: themeBackgroundOverlay }}>
           {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingHorizontal: 16,
-              paddingTop: 50,
-              paddingBottom: 10,
-              backgroundColor: cardBackground,
-              borderBottomWidth: 1,
-              borderBottomColor: headerBorder,
-            }}
-          >
-            <Text
-              variant="titleMedium"
-              style={{ fontWeight: "bold", color: textColor }}
-            >
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingHorizontal: 16,
+            paddingTop: 50,
+            paddingBottom: 10,
+            backgroundColor: cardBackground,
+            borderBottomWidth: 1,
+            borderBottomColor: headerBorder
+          }}>
+            <Text variant="titleMedium" style={{ fontWeight: "bold", color: textColorHeader }}>
               {t.header_title2} ({language})
             </Text>
 
@@ -252,9 +365,7 @@ export default function Home() {
                   }}
                   onPress={() => setMenuVisible((prev) => !prev)}
                 >
-                  <Text
-                    style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}
-                  >
+                  <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
                     {userName.charAt(0).toUpperCase()}
                   </Text>
                 </TouchableOpacity>
@@ -262,7 +373,10 @@ export default function Home() {
             >
               <Menu.Item title={USER} titleStyle={{ color: "#000000ff" }} />
               <Menu.Item
-                onPress={() => setMenuVisible(false)}
+                onPress={() => {
+                  setMenuVisible(false);
+                  setIsSettingsModalVisible(true);
+                }}
                 title={t.settings_menu}
               />
               <Menu.Item
@@ -274,74 +388,39 @@ export default function Home() {
           </View>
 
           <ScrollView style={{ padding: 16 }}>
-            {/* Month Selector */}
-            <View style={{ marginTop: 16 }}>
+            {/* Month/Year selectors */}
+            <View style={{ marginVertical: 8, flexDirection: "row", justifyContent: "space-between" }}>
               <Menu
                 visible={monthMenuVisible}
                 onDismiss={() => setMonthMenuVisible(false)}
                 anchor={
                   <Button
                     mode="outlined"
-                    textColor="#000"
-                    style={{
-                      borderColor: "#2A2A2A",
-                      borderWidth: 1,
-                      backgroundColor: "#FFFFFFE6",
-                    }}
-                    onPress={() => {
-                      setMonthMenuVisible(true);
-                      setYearMenuVisible(false);
-                    }}
+                    onPress={() => { setMonthMenuVisible(true); setYearMenuVisible(false); }}
                   >
                     {t.month_prefix} {monthNames[selectedMonth]}
                   </Button>
                 }
               >
                 {monthNames.map((name, i) => (
-                  <Menu.Item
-                    key={i}
-                    onPress={() => {
-                      setSelectedMonth(i);
-                      setMonthMenuVisible(false);
-                    }}
-                    title={name}
-                  />
+                  <Menu.Item key={i} title={name} onPress={() => { setSelectedMonth(i); setMonthMenuVisible(false); }} />
                 ))}
               </Menu>
-            </View>
 
-            {/* Year Selector */}
-            <View style={{ marginTop: 12 }}>
               <Menu
                 visible={yearMenuVisible}
                 onDismiss={() => setYearMenuVisible(false)}
                 anchor={
                   <Button
                     mode="outlined"
-                    textColor="#000"
-                    style={{
-                      borderColor: "#2A2A2A",
-                      borderWidth: 1,
-                      backgroundColor: "#FFFFFFE6",
-                    }}
-                    onPress={() => {
-                      setYearMenuVisible(true);
-                      setMonthMenuVisible(false);
-                    }}
+                    onPress={() => { setYearMenuVisible(true); setMonthMenuVisible(false); }}
                   >
                     {t.year_prefix} {selectedYear}
                   </Button>
                 }
               >
                 {[2025, 2024, 2023, 2022].map((y) => (
-                  <Menu.Item
-                    key={y}
-                    onPress={() => {
-                      setSelectedYear(y);
-                      setYearMenuVisible(false);
-                    }}
-                    title={String(y)}
-                  />
+                  <Menu.Item key={y} title={String(y)} onPress={() => { setSelectedYear(y); setYearMenuVisible(false); }} />
                 ))}
               </Menu>
             </View>
@@ -349,23 +428,15 @@ export default function Home() {
             {/* Bar Chart */}
             {monthlyEntries.length > 0 && (
               <ScrollView horizontal style={{ marginTop: 24 }}>
-                <View
-                  style={{
-                    width: Math.max(
-                      symptomNames.length * 120,
-                      Dimensions.get("window").width - 32
-                    ),
-                    backgroundColor: "#FFFFFFE6",
-                    borderRadius: 16,
-                    padding: 8,
-                  }}
-                >
+                <View style={{
+                  width: Math.max(symptomNames.length * 120, Dimensions.get("window").width - 32),
+                  backgroundColor: "#FFFFFFE6",
+                  borderRadius: 16,
+                  padding: 8
+                }}>
                   <BarChart
                     data={barChartData}
-                    width={Math.max(
-                      symptomNames.length * 120,
-                      Dimensions.get("window").width - 32
-                    )}
+                    width={Math.max(symptomNames.length * 120, Dimensions.get("window").width - 32)}
                     height={300}
                     fromZero
                     showValuesOnTopOfBars
@@ -377,20 +448,15 @@ export default function Home() {
                       color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
                       labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
                     }}
-                    style={{ borderRadius: 16 }}
                     barPercentage={0.6}
                   />
                 </View>
               </ScrollView>
             )}
 
-            {/* PDF Report */}
+            {/* PDF Report Button */}
             <Button
-              style={{
-                marginTop: 24,
-                borderRadius: 24,
-                backgroundColor: "#4A4A4A",
-              }}
+              style={{ marginTop: 24, borderRadius: 24, backgroundColor: "#4A4A4A" }}
               mode="contained"
               onPress={generateFullReport}
               textColor="#ffffff"
