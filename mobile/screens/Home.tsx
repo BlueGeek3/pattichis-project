@@ -5,7 +5,6 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  useColorScheme,
   ImageBackground,
   StyleSheet,
   useWindowDimensions,
@@ -26,198 +25,48 @@ import { BarChart } from "react-native-chart-kit";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { listHistory } from "../lib/api";
-import { useNavigation, StackActions } from "@react-navigation/native";
+import { useNavigation, StackActions, useFocusEffect } from "@react-navigation/native";
 import { getUsername, removeUsername } from "../utils/authStorage";
 import { useSettings } from "../utils/SettingsContext";
 
 import { getHomeTranslations, getMonthNames } from "../utils/translations";
 
-//const USER = "demo";
 let USER = "demo";
 const AVAILABLE_LANGUAGES = ["English", "Greek"];
 const bg = require("../assets/bg-screens.png");
 
-/**
- * Settings Modal Component - NOW USES CONTEXT
- */
-const SettingsModal = ({ isVisible, onClose }) => {
-  const { isDarkMode, language, toggleDarkMode, setLanguage } = useSettings();
-  const [languageMenuVisible, setLanguageMenuVisible] = useState(false);
-
-  // Use of helper function to get translations
-  const t = getHomeTranslations(language);
-  // --------------------------------
-
-  const modalBackground = isDarkMode ? "#1e1e1e" : "#ffffff";
-  const textColor = isDarkMode ? "#ffffff" : "#000000";
-  const dividerColor = isDarkMode ? "#333" : "#ccc";
-  const currentLanguageColor = isDarkMode ? "#aaa" : "#666";
-
-  const SWITCH_COLORS = {
-    SWITCH_ON_COLOR: "#8F8F8F",
-    SWITCH_ON_THUMB: "#A9A9A9",
-    SWITCH_OFF_TRACK: "#FFC7C7",
-    SWITCH_OFF_THUMB: "#FFFAFA",
-  };
-  return (
-    <Portal>
-      <Modal
-        visible={isVisible}
-        onDismiss={onClose}
-        contentContainerStyle={{
-          backgroundColor: modalBackground,
-          padding: 20,
-          margin: 20,
-          borderRadius: 12,
-        }}
-      >
-        <Text
-          variant="titleLarge"
-          style={{ color: textColor, marginBottom: 20 }}
-        >
-          {t.settings_title}
-        </Text>
-
-        {/* Dark Mode Toggle */}
-        <List.Item
-          title={t.dark_mode_title}
-          titleStyle={{ color: textColor }}
-          right={() => (
-            <Switch
-              value={isDarkMode}
-              onValueChange={toggleDarkMode}
-              trackColor={{
-                false: SWITCH_COLORS.SWITCH_OFF_TRACK, // Track color when OFF (Light Mode)
-                true: SWITCH_COLORS.SWITCH_ON_COLOR, // Track color when ON (Dark Mode)
-              }}
-              // 2. Define the thumb (moving circle) colors for checked and unchecked
-              thumbColor={
-                isDarkMode
-                  ? SWITCH_COLORS.SWITCH_ON_THUMB // Thumb color when ON
-                  : SWITCH_COLORS.SWITCH_OFF_THUMB // Thumb color when OFF
-              }
-            />
-          )}
-          style={{ paddingHorizontal: 0 }}
-        />
-
-        <Divider style={{ backgroundColor: dividerColor }} />
-
-        {/* Language Selector */}
-        <List.Item
-          title={t.language_title}
-          titleStyle={{ color: textColor }}
-          description={language}
-          descriptionStyle={{ color: currentLanguageColor }}
-          right={() => (
-            <Menu
-              visible={languageMenuVisible}
-              onDismiss={() => setLanguageMenuVisible(false)}
-              anchor={
-                <Button
-                  mode="outlined"
-                  textColor="#000000"
-                  style={{
-                    marginTop: 8,
-                    borderColor: "#2A2A2A",
-                    borderWidth: 1,
-                    backgroundColor: "#FFFFFFE6",
-                  }}
-                  onPress={() => setLanguageMenuVisible(true)}
-                >
-                  {t.change_btn}
-                </Button>
-              }
-            >
-              {AVAILABLE_LANGUAGES.map((item) => (
-                <Menu.Item
-                  key={item}
-                  onPress={() => {
-                    setLanguage(item);
-                    setLanguageMenuVisible(false);
-                  }}
-                  title={item}
-                  style={{
-                    backgroundColor: language === item ? "#e0f7fa" : "white",
-                  }}
-                />
-              ))}
-            </Menu>
-          )}
-          style={{ paddingHorizontal: 0 }}
-        />
-
-        <Button
-          mode="contained"
-          onPress={onClose}
-          style={{
-            marginTop: 30,
-            backgroundColor: "#4A4A4A",
-            borderRadius: 24,
-          }}
-          textColor="#ffffff"
-        >
-          {t.close_btn}
-        </Button>
-      </Modal>
-    </Portal>
-  );
-};
-
-// -----------------------------------
-
 export default function Home() {
   const navigation = useNavigation();
-
-  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const { isDarkMode, language } = useSettings();
 
   const [history, setHistory] = useState<any[]>([]);
-
   const [userName, setUserName] = useState<string>("Demo");
   const [menuVisible, setMenuVisible] = useState<boolean>(false);
+  const [monthMenuVisible, setMonthMenuVisible] = useState(false);
+  const [yearMenuVisible, setYearMenuVisible] = useState(false);
 
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
-  const [monthMenuVisible, setMonthMenuVisible] = useState(false);
-  const [yearMenuVisible, setYearMenuVisible] = useState(false);
 
-  // Use of helper functions to get translations
   const t = getHomeTranslations(language);
   const monthNames = getMonthNames(language);
-  // --------------------------------
-
-  /* const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];*/
-
-  // Softer overlay so background image is visible, similar feel to History screen
-  const themeBackgroundOverlay = isDarkMode
-    ? "rgba(0, 0, 0, 0.35)"
-    : "transparent";
-  const cardBackground = isDarkMode ? "#1e1e1e" : "#FFFFFFE6";
-  const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
-  const headerBorder = isDarkMode ? "#333" : "#eee";
 
   const { height } = useWindowDimensions();
   const isWeb = Platform.OS === "web";
 
+  // Reset menu visibility when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      setMonthMenuVisible(false);
+      setYearMenuVisible(false);
+      setMenuVisible(false);
+    }, [])
+  );
+
   useEffect(() => {
     const loadCredentials = async () => {
       const fetchedUsername = await getUsername();
-
       if (!fetchedUsername) {
         Alert.alert(t.session_expired_title, t.session_expired_msg);
         navigation.dispatch(StackActions.replace("Login"));
@@ -263,18 +112,23 @@ export default function Home() {
     datasets: [{ data: avgPainPerSymptom.length ? avgPainPerSymptom : [0] }],
   };
 
+  const themeBackgroundOverlay = isDarkMode
+    ? "rgba(0, 0, 0, 0.35)"
+    : "transparent";
+  const cardBackground = isDarkMode ? "#1e1e1e" : "#FFFFFFE6";
+  const textColor = isDarkMode ? "#ffffff" : "#2A2A2A";
+  const headerBorder = isDarkMode ? "#333" : "#eee";
+
+  // ----------------- PDF Report -----------------
   const groupedByMonth: Record<string, any[]> = {};
   history.forEach((h) => {
     const d = new Date(h.date);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}`;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     if (!groupedByMonth[key]) groupedByMonth[key] = [];
     groupedByMonth[key].push(h);
   });
 
-  async function generateFullReport() {
+  const generateFullReport = async () => {
     if (!history.length) {
       alert(t.no_report_data);
       return;
@@ -297,9 +151,7 @@ export default function Home() {
         <body>
           <h1>${t.header_title}</h1>
           <p><strong>${t.report_user_label}</strong> ${USER}</p>
-          <p><strong>${
-            t.report_generated_label
-          }</strong> ${new Date().toLocaleString()}</p>
+          <p><strong>${t.report_generated_label}</strong> ${new Date().toLocaleString()}</p>
 
           ${Object.keys(groupedByMonth)
             .sort((a, b) => b.localeCompare(a))
@@ -309,17 +161,12 @@ export default function Home() {
               const monthIndex = Number(monthNum) - 1;
               const monthName = monthNames[monthIndex];
 
-              const avgPain = (
-                entries.reduce((s, x) => s + x.painScore, 0) / entries.length
-              ).toFixed(1);
-              const avgHours = (
-                entries.reduce((s, x) => s + x.hours, 0) / entries.length
-              ).toFixed(1);
+              const avgPain = (entries.reduce((s, x) => s + x.painScore, 0) / entries.length).toFixed(1);
+              const avgHours = (entries.reduce((s, x) => s + x.hours, 0) / entries.length).toFixed(1);
 
               const symptomMapMonth: Record<string, number[]> = {};
               entries.forEach((h) => {
-                if (!symptomMapMonth[h.symptomName])
-                  symptomMapMonth[h.symptomName] = [];
+                if (!symptomMapMonth[h.symptomName]) symptomMapMonth[h.symptomName] = [];
                 symptomMapMonth[h.symptomName].push(h.painScore);
               });
               const symptomNamesMonth = Object.keys(symptomMapMonth);
@@ -331,66 +178,44 @@ export default function Home() {
               return `
                 <h2>${monthName} ${year}</h2>
                 <div class="summary">
-                  <p><strong>${t.report_entries_label}</strong> ${
-                entries.length
-              }</p>
+                  <p><strong>${t.report_entries_label}</strong> ${entries.length}</p>
                   <p><strong>${t.report_avg_pain_label}</strong> ${avgPain}</p>
-                  <p><strong>${
-                    t.report_avg_hours_label
-                  }</strong> ${avgHours}</p>
+                  <p><strong>${t.report_avg_hours_label}</strong> ${avgHours}</p>
                 </div>
                 <div class="chart">
                   <img src="https://quickchart.io/chart?c={
                     type:'bar',
                     data:{
-                      labels:[${symptomNamesMonth
-                        .map((s) => `'${s}'`)
-                        .join(",")}],
-                      datasets:[{label:'Avg Pain',data:[${avgPainPerSymptomMonth.join(
-                        ","
-                      )}]}]
+                      labels:[${symptomNamesMonth.map((s) => `'${s}'`).join(",")}],
+                      datasets:[{label:'Avg Pain',data:[${avgPainPerSymptomMonth.join(",")}] }]
                     },
                     options:{plugins:{legend:{display:false}}}
                   }" />
                 </div>
                 <table>
                   <tr><th>Date</th><th>Symptom</th><th>Pain</th><th>Hours</th></tr>
-                  ${entries
-                    .map(
-                      (h) =>
-                        `<tr><td>${h.date}</td><td>${h.symptomName}</td><td>${h.painScore}</td><td>${h.hours}</td></tr>`
-                    )
-                    .join("")}
+                  ${entries.map(h => `<tr><td>${h.date}</td><td>${h.symptomName}</td><td>${h.painScore}</td><td>${h.hours}</td></tr>`).join("")}
                 </table>
               `;
-            })
-            .join("")}
+            }).join("")}
         </body>
       </html>
     `;
 
     const { uri } = await Print.printToFileAsync({ html });
     await Sharing.shareAsync(uri);
-  }
+  };
+
+  // -------------------------------------------
 
   return (
     <PaperProvider>
-      <SettingsModal
-        isVisible={isSettingsModalVisible}
-        onClose={() => setIsSettingsModalVisible(false)}
-      />
-
       <ImageBackground
         source={bg}
         resizeMode="cover"
         style={[styles.bg, isWeb && { height, width: "100%" }]}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: themeBackgroundOverlay,
-          }}
-        >
+        <View style={{ flex: 1, backgroundColor: themeBackgroundOverlay }}>
           {/* Header */}
           <View
             style={{
@@ -424,9 +249,8 @@ export default function Home() {
                     backgroundColor: "#4A4A4A",
                     justifyContent: "center",
                     alignItems: "center",
-                    elevation: 4,
                   }}
-                  onPress={() => setMenuVisible(!menuVisible)}
+                  onPress={() => setMenuVisible((prev) => !prev)}
                 >
                   <Text
                     style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}
@@ -435,14 +259,10 @@ export default function Home() {
                   </Text>
                 </TouchableOpacity>
               }
-              style={{ marginTop: 20, marginRight: 10 }}
             >
               <Menu.Item title={USER} titleStyle={{ color: "#000000ff" }} />
               <Menu.Item
-                onPress={() => {
-                  setMenuVisible(false);
-                  setIsSettingsModalVisible(true);
-                }}
+                onPress={() => setMenuVisible(false)}
                 title={t.settings_menu}
               />
               <Menu.Item
@@ -462,13 +282,16 @@ export default function Home() {
                 anchor={
                   <Button
                     mode="outlined"
-                    textColor="#000000"
+                    textColor="#000"
                     style={{
                       borderColor: "#2A2A2A",
                       borderWidth: 1,
                       backgroundColor: "#FFFFFFE6",
                     }}
-                    onPress={() => setMonthMenuVisible(true)}
+                    onPress={() => {
+                      setMonthMenuVisible(true);
+                      setYearMenuVisible(false);
+                    }}
                   >
                     {t.month_prefix} {monthNames[selectedMonth]}
                   </Button>
@@ -495,13 +318,16 @@ export default function Home() {
                 anchor={
                   <Button
                     mode="outlined"
-                    textColor="#000000"
+                    textColor="#000"
                     style={{
                       borderColor: "#2A2A2A",
                       borderWidth: 1,
                       backgroundColor: "#FFFFFFE6",
                     }}
-                    onPress={() => setYearMenuVisible(true)}
+                    onPress={() => {
+                      setYearMenuVisible(true);
+                      setMonthMenuVisible(false);
+                    }}
                   >
                     {t.year_prefix} {selectedYear}
                   </Button>
@@ -542,7 +368,7 @@ export default function Home() {
                     )}
                     height={300}
                     fromZero
-                    showValuesOnTopOfBars={true}
+                    showValuesOnTopOfBars
                     chartConfig={{
                       backgroundColor: "#ffffff",
                       backgroundGradientFrom: "#ffffff",
@@ -552,12 +378,7 @@ export default function Home() {
                       labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`,
                     }}
                     style={{ borderRadius: 16 }}
-                    withHorizontalLabels={true}
-                    withInnerLines={true}
                     barPercentage={0.6}
-                    formatXLabel={(label) =>
-                      label.length > 12 ? label.slice(0, 12) + "…" : label
-                    }
                   />
                 </View>
               </ScrollView>
@@ -566,7 +387,7 @@ export default function Home() {
             {/* PDF Report */}
             <Button
               style={{
-                marginTop: 29,
+                marginTop: 24,
                 borderRadius: 24,
                 backgroundColor: "#4A4A4A",
               }}
@@ -575,20 +396,6 @@ export default function Home() {
               textColor="#ffffff"
             >
               {t.download_report_btn}
-            </Button>
-
-            <Button
-              style={{
-                marginTop: 16,
-                borderRadius: 24,
-                borderColor: "#2A2A2A",
-                borderWidth: 1,
-                backgroundColor: "#FFFFFFE6",
-              }}
-              mode="outlined"
-              textColor="#000000"
-            >
-              {t.add_log_btn}
             </Button>
           </ScrollView>
         </View>
@@ -599,10 +406,4 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1 },
-  container: { flex: 1, paddingHorizontal: 16 },
-  title: {
-    marginBottom: 8,
-    fontWeight: "700",
-    color: "#2A2A2A",
-  },
 });
