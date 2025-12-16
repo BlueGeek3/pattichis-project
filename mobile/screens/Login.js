@@ -36,7 +36,7 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- NEW FUNCTION: Handle Forgot Password Click ---
+  // --- Handle Forgot Password Click ---
   const handleForgotPassword = () => {
     Alert.alert(
       "Reset Password Instructions", // Title
@@ -89,9 +89,9 @@ export default function Login() {
 
       if (data.success) {
         // --- USER LOGIC START ---
-        // 1. Check if the USER exists in the response
+        // Check if the USER exists in the response
         if (data.user) {
-          // 2. Save the user persistently
+          // Save the user persistently
           console.log(
             "Login successful. User received from server:",
             data.user
@@ -119,7 +119,7 @@ export default function Login() {
     } catch (error) {
       console.error("Login Error:", error);
       setMessage(
-        `Network Error: Could not connect to the server. Check your API_URL and server status.`
+        `Network Error: Could not connect to the server. Check your API_URL and server status or your username and password`
       );
     } finally {
       setIsLoading(false);
@@ -134,7 +134,7 @@ export default function Login() {
         KeyboardAvoidingView
       >
         <ScrollView
-          contentContainerStyle={GlobalStyles.scrollViewContent} //{GlobalStyles.container}
+          contentContainerStyle={GlobalStyles.scrollViewContent}
           keyboardShouldPersistTaps="handled"
         >
           <View style={GlobalStyles.formCard}>

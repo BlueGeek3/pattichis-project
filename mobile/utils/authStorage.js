@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// NEW KEY for the username
+// KEY for the username
 const USERNAME_KEY = "@user_username";
 
 /**

@@ -141,7 +141,6 @@ if ($insert_stmt->execute()) {
 // =========================================================================
 
 // Close the insertion statement
-// NOTE: This MUST be done before 'cleanup' if a statement was successfully prepared/executed
 if (isset($insert_stmt) && $insert_stmt instanceof mysqli_stmt) {
     $insert_stmt->close();
 }
@@ -153,13 +152,13 @@ if (isset($conn) && $conn instanceof mysqli) {
 }
 
 final_response:
-// 1. Set the determined HTTP status code.
+// Set the determined HTTP status code.
 http_response_code($server_response_code);
 
-// 2. The single, final echo of the JSON response.
+// The single, final echo of the JSON response.
 echo json_encode($server_response);
 
-// 3. CRITICAL FIX: Flush the buffer to send the JSON data to the client, 
+// CRITICAL FIX: Flush the buffer to send the JSON data to the client, 
 //    then turn off buffering.
 ob_end_flush();
 

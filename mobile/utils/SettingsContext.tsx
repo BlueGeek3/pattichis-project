@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useColorScheme } from "react-native";
 
-// 1. Define the shape of the Context
+// Define the shape of the Context
 interface SettingsContextType {
   isDarkMode: boolean;
   language: string;
@@ -15,12 +15,12 @@ interface SettingsContextType {
   setLanguage: (lang: string) => void;
 }
 
-// 2. Create the Context with a default empty value
+// Create the Context with a default empty value
 const SettingsContext = createContext<SettingsContextType | undefined>(
   undefined
 );
 
-// 3. Create a custom hook for easy consumption
+// Create a custom hook for easy consumption
 export const useSettings = () => {
   const context = useContext(SettingsContext);
   if (context === undefined) {
@@ -29,7 +29,7 @@ export const useSettings = () => {
   return context;
 };
 
-// 4. Create the Provider component
+// Create the Provider component
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {

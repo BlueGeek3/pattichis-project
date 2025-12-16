@@ -1,14 +1,14 @@
 import { StyleSheet } from "react-native";
 
 const GlobalStyles = StyleSheet.create({
-  // 1. New style for the ScrollView content container
-  // It centers the content (your Form Card) vertically.
+  // Style for the ScrollView content container
+  // It centers the content vertically.
   scrollViewContent: {
     flexGrow: 1, // Allows content to fill space for centering
     justifyContent: "center", // Centers the card vertically
     paddingHorizontal: 20, // Padding from the screen edges
   },
-  // 2. The new 'Card' style for the form content itself
+  // The new 'Card' style for the form content itself
   formCard: {
     // 50% opaque background
     backgroundColor: "#CDE2FF",

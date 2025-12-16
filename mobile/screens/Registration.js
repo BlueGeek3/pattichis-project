@@ -37,7 +37,7 @@ const Registration = () => {
   const [message, setMessage] = useState("");
   const navigation = useNavigation(); // State for messages coming from the server (success/network/failure)
 
-  // NEW STATE: Tracks the validation status of each input field
+  // Tracks the validation status of each input field
   // Statuses: 'default', 'error', 'success'
   const [fieldStatus, setFieldStatus] = useState({
     username: "default",
@@ -46,7 +46,7 @@ const Registration = () => {
     retypedPass: "default",
   });
 
-  // NEW State to hold specific error messages for display below the input fields
+  // Holds specific error messages for display below the input fields
   const [validationErrors, setValidationErrors] = useState({
     username: "",
     email: "",
@@ -68,14 +68,14 @@ const Registration = () => {
     // Clear previous server/network messages before re-validating
     setMessage("");
 
-    // --- 1. Check Username ---
+    // --- Check Username ---
     if (username.length < 3) {
       newErrors.username = "Username must be at least 3 characters long.";
       newStatuses.username = "error";
       hasError = true;
     }
 
-    // --- 2. Check Email ---
+    // --- Check Email ---
     if (email.length === 0) {
       newErrors.email = "Email address is required.";
       newStatuses.email = "error";
@@ -87,14 +87,14 @@ const Registration = () => {
       hasError = true;
     }
 
-    // --- 3. Check Password ---
+    // --- Check Password ---
     if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters long.";
       newStatuses.password = "error";
       hasError = true;
     }
 
-    // --- 4. Check Retyped Password ---
+    // --- Check Retyped Password ---
     if (password !== retypedPass || password.length < 6) {
       newStatuses.retypedPass = "error";
       hasError = true;
@@ -235,7 +235,7 @@ const Registration = () => {
         KeyboardAvoidingView
       >
         <ScrollView
-          contentContainerStyle={GlobalStyles.scrollViewContent} //{GlobalStyles.container}
+          contentContainerStyle={GlobalStyles.scrollViewContent}
           keyboardShouldPersistTaps="handled"
         >
           <View style={GlobalStyles.formCard}>

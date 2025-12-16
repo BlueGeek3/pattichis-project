@@ -1,9 +1,15 @@
 <?php
-
+// =========================================================================
+// SECTION 1: API Configuration and Security Headers (CORS)
+// =========================================================================
 // CORS + preflight
+// Allow access from any origin (*).
 header("Access-Control-Allow-Origin: *");
+// Explicitly state that only the POST method is allowed for submitting credentials.
 header("Access-Control-Allow-Methods: POST, OPTIONS");
+// Standard headers required for complex requests (like those with JSON data).
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+// Ensure the response is correctly recognized as JSON data.
 header("Content-Type: application/json; charset=UTF-8");
 
 // Handle preflight quickly
@@ -13,25 +19,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // =========================================================================
-// SECTION 1: API Configuration and Security Headers (CORS)
-// =========================================================================
-
-// Allow access from any origin (*).
-// header("Access-Control-Allow-Origin: *");
-// // Ensure the response is correctly recognized as JSON data.
-// header("Content-Type: application/json; charset=UTF-8");
-// // Explicitly state that only the POST method is allowed for submitting credentials.
-// header("Access-Control-Allow-Methods: POST");
-// // Standard headers required for complex requests (like those with JSON data).
-// header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
-// =========================================================================
 // SECTION 2: Database Connection Details (Local XAMPP Setup)
 // =========================================================================
 
 // The hostname where MySQL is running (it's the same machine as PHP).
 $host = "localhost"; 
-// The name of your database created in phpMyAdmin.
+// The name of the database created in phpMyAdmin.
 $db_name = "multiplesclerosisdb"; 
 // The default XAMPP MySQL username.
 $username = "root";                   
@@ -42,7 +35,7 @@ $password = "";
 // SECTION 3: Initial Request Validation
 // =========================================================================
 
-// 3.1 Method Check: Must be a POST request.
+// Method Check: Must be a POST request.
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     // Respond with HTTP 405 (Method Not Allowed) and a JSON error message.
     http_response_code(405);
@@ -50,10 +43,10 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit(); // Stop script execution immediately.
 }
 
-// 3.2 Data Extraction
+// Data Extraction
 $data = json_decode(file_get_contents("php://input"));
 
-// 3.3 Presence Check: Verify both required fields exist in the JSON payload.
+// Presence Check: Verify both required fields exist in the JSON payload.
 if (!isset($data->username) || !isset($data->password)) {
     // Respond with HTTP 400 (Bad Request).
     http_response_code(400);
@@ -61,7 +54,7 @@ if (!isset($data->username) || !isset($data->password)) {
     exit();
 }
 
-// 3.4 Variable Assignment and Trimming.
+// Variable Assignment and Trimming.
 $user = trim($data->username);
 $pass = trim($data->password);
 
@@ -91,19 +84,19 @@ if ($conn->connect_error) {
 // SECTION 5: Secure Login Logic (Prepared Statements)
 // =========================================================================
 
-// 5.1 SQL Query Preparation (Security Critical Step)
+// SQL Query Preparation (Security Critical Step)
 $query = "SELECT Password FROM users WHERE username = ? LIMIT 1"; 
 
 // Prepare the statement. This sends the query structure to MySQL for parsing.
 $stmt = $conn->prepare($query);
 
-// 5.2 Bind Parameters
+// Bind Parameters
 $stmt->bind_param("s", $user);
 
-// 5.3 Execute Query
+// Execute Query
 $stmt->execute();
 
-// 5.4 Store Result and Bind Output
+// Store Result and Bind Output
 $stmt->store_result();
 // Binds the single column result to a PHP variable.
 $stmt->bind_result($user_pass);
@@ -114,10 +107,9 @@ $stmt->fetch();
 // SECTION 6: Verification and Response
 // =========================================================================
 
-// 6.1 Core Verification Logic
+// Core Verification Logic
 if ($stmt->num_rows == 1 && $pass == $user_pass) {    
     // Success: Login credentials are valid.
-
     http_response_code(200); // OK
     echo json_encode(["success" => true, "message" => "Login successful. Welcome!", "user" => $user]);   
 }
