@@ -142,7 +142,7 @@ npm run web # open in the browser
 npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
 
 From backend/:
-
+npm run dev
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 From backend/src:
