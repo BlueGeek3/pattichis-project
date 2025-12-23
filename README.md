@@ -120,13 +120,13 @@ For all the choices below you need to have a xampp server running with a databas
 
 ### From backend/src:
 
-Assuming xampp is under C drive otherwise change the path of the following command:
+Assuming xampp is running and it is under C drive otherwise change the path of the following command:
 "C:\xampp\php\php.exe" -S 0.0.0.0:8080
 
 ### From backend/:
 
-npm run dev
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+- npm run dev
+- uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 ### From mobile/:
 
@@ -162,3 +162,11 @@ const BASE = "http://<your-pc-lan-ip>/ms-api";
 npx expo start
 
 Scan the QR code with Expo Go.
+
+**D) APK**
+
+1. You should download and install the latest apk for android devices from https://expo.dev/accounts/msdiary/projects/mobile/builds/64928031-b012-491d-93cb-ce26353ba910
+2. On three different terminals on backend/: run the following commands:
+   - npx localtunnel --port 3000
+   - npx localtunnel --port 8080 --subdomain msdiary-php
+   - npx localtunnel --port 3000 --subdomain msdiary-node
