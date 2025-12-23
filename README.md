@@ -14,7 +14,7 @@ MS-Symptoms-Diary/
 
 - XAMPP Apache/MySQL if you’re also running the PHP ms-api endpoints used by the mobile app you should download xampp from https://www.apachefriends.org/
 
-- (Optional) Android Studio for an Android emulator
+- (Optional) Android Studio for an Android emulator from https://developer.android.com/studio
 
 - (Optional) Expo Go app on your phone (for on-device testing)
 
@@ -102,14 +102,14 @@ const BASE = "http://localhost/ms-api"; // <- if you also run your PHP ms-api on
 
 If you’re only testing the FastAPI /healthz and not the PHP endpoints, you can temporarily point to http://127.0.0.1:8000 and consume that instead.
 
-** Under mobile, run the following command **
+**Under mobile, run the following command**
 to save authentication token on device storage:
 npm install @react-native-async-storage/async-storage
 
-** For the dropdown list run : **
+**For the dropdown list run :**
 npm install react-native-element-dropdown
 
-** For the report : **
+**For the report :**
 npm install react-native-chart-kit react-native-svg
 npm install expo-print expo-sharing
 
@@ -119,7 +119,7 @@ A) Web (easiest, runs in your browser)
 
 npm run web
 
-** or **
+**or**
 
 npx expo start # then press "w"
 
