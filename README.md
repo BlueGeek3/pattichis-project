@@ -20,8 +20,8 @@ MS-Symptoms-Diary/
 
 - (Optional) Expo Go app on your phone (for on-device testing)
 
-- Create a new database with the name **multiplesclerosisdb** on phpMyAdmin on the xampp server and add the tables needed:
-  - Import the database schema **multiplesclerosisdb.sql** to the newly created database,
+- Create a new database with the name **multiplesclerosisdb** on phpMyAdmin on the xampp server and add the tables needed. (They will be attached to the zip file):
+  - Import the database schema **multiplesclerosisdb.sql** to the newly created database.
   - Run the query **query.txt**.
 
 ### Backend (FastAPI)
