@@ -1,22 +1,22 @@
-Pattichis Project — Dev Setup
+# MS-Symptoms-Diary — Dev Setup
 
 Monorepo with a Python FastAPI backend and a React Native (Expo) mobile app.
 
-pattichis-project/
+MS-Symptoms-Diary/
 ├─ backend/ # FastAPI app
 └─ mobile/ # Expo app (Intro → Tabs)
 
-Prerequisites
+## Prerequisites
 
-Python 3.11
+- Python 3.11
 
-Node.js LTS (includes npm)
+* Node.js LTS (includes npm)
 
-(Optional) Android Studio for an Android emulator
+- (Optional) Android Studio for an Android emulator
 
-(Optional) Expo Go app on your phone (for on-device testing)
+* (Optional) Expo Go app on your phone (for on-device testing)
 
-(Optional) XAMPP Apache/MySQL if you’re also running the PHP ms-api endpoints used by the mobile app
+- (Optional) XAMPP Apache/MySQL if you’re also running the PHP ms-api endpoints used by the mobile app you should download xampp from https://www.apachefriends.org/
 
 1. Backend (FastAPI)
    Create & activate a virtual environment, install deps, run server
@@ -151,7 +151,7 @@ Assuming xampp is under C drive otherwise change the path of the following comma
 "C:\xampp\php\php.exe" -S 0.0.0.0:8080
 
 Under mobile, run the following command
- to save authentication token on device storage:
+to save authentication token on device storage:
 npm install @react-native-async-storage/async-storage
 
 for the dropdown list run :
