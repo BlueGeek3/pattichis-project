@@ -116,6 +116,24 @@ npm install expo-print expo-sharing
 
 ## Run the app (choose one)
 
+For all the choices below you need to have a xampp server running with a database configured
+
+### From backend/src:
+
+Assuming xampp is under C drive otherwise change the path of the following command:
+"C:\xampp\php\php.exe" -S 0.0.0.0:8080
+
+### From backend/:
+
+npm run dev
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+### From mobile/:
+
+npm start # expo start (choose web/android/ios in the CLI)
+npm run web # open in the browser
+npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
+
 A) Web (easiest, runs in your browser)
 
 npm run web
@@ -144,21 +162,3 @@ Start Expo:
 npx expo start
 
 Scan the QR code with Expo Go.
-
-3. Common scripts & tips
-
-### From backend/src:
-
-Assuming xampp is under C drive otherwise change the path of the following command:
-"C:\xampp\php\php.exe" -S 0.0.0.0:8080
-
-### From backend/:
-
-npm run dev
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-
-### From mobile/:
-
-npm start # expo start (choose web/android/ios in the CLI)
-npm run web # open in the browser
-npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
