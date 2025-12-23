@@ -10,57 +10,57 @@ MS-Symptoms-Diary/
 
 - Python 3.11
 
-* Node.js LTS (includes npm)
+- Node.js LTS from https://nodejs.org/en (includes npm)
+
+- XAMPP Apache/MySQL if you’re also running the PHP ms-api endpoints used by the mobile app you should download xampp from https://www.apachefriends.org/
 
 - (Optional) Android Studio for an Android emulator
 
-* (Optional) Expo Go app on your phone (for on-device testing)
-
-- (Optional) XAMPP Apache/MySQL if you’re also running the PHP ms-api endpoints used by the mobile app you should download xampp from https://www.apachefriends.org/
+- (Optional) Expo Go app on your phone (for on-device testing)
 
 1. Backend (FastAPI)
    Create & activate a virtual environment, install deps, run server
 
-# From repo root
+## From repo root
 
 cd backend
 
-# Create a local venv (recommended name: .venv so it's ignored by git)
+Create a local venv (recommended name: .venv so it's ignored by git)
 
 python -m venv .venv
 
-# Activate it
+Activate it
 
-# Windows (PowerShell):
+### Windows (PowerShell):
 
 .venv\Scripts\Activate.ps1
 
-# Windows (cmd):
+### Windows (cmd):
 
 .venv\Scripts\activate.bat
 
-# macOS/Linux:
+### macOS/Linux:
 
-# source .venv/bin/activate
+source .venv/bin/activate
 
-# Install requirements
+## Install requirements
 
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Create .env (if not present)
+### Create .env (if not present)
 
-# APP_ENV is optional; used just as an example flag
+APP_ENV is optional; used just as an example flag
 
-# Windows:
+### Windows:
 
 copy .env.example .env
 
-# macOS/Linux:
+### macOS/Linux:
 
-# cp .env.example .env
+cp .env.example .env
 
-# Run the API (auto-reload)
+### Run the API (auto-reload)
 
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
@@ -75,15 +75,15 @@ Tip: stop the server with Ctrl+C. Deactivate the venv with deactivate.
 2. Mobile (Expo / React Native)
    Install dependencies
 
-# From repo root
+## From repo root
 
 cd mobile
 
-# Install node dependencies
+## Install node dependencies
 
 npm install
 
-# (If you’ve never installed these on this machine, run once)
+### (If you’ve never installed these on this machine, run once)
 
 npm i @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-paper
 npx expo install react-native-screens react-native-safe-area-context
