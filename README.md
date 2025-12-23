@@ -102,13 +102,24 @@ const BASE = "http://localhost/ms-api"; // <- if you also run your PHP ms-api on
 
 If you’re only testing the FastAPI /healthz and not the PHP endpoints, you can temporarily point to http://127.0.0.1:8000 and consume that instead.
 
-Run the app (choose one)
+** Under mobile, run the following command **
+to save authentication token on device storage:
+npm install @react-native-async-storage/async-storage
+
+** For the dropdown list run : **
+npm install react-native-element-dropdown
+
+** For the report : **
+npm install react-native-chart-kit react-native-svg
+npm install expo-print expo-sharing
+
+## Run the app (choose one)
 
 A) Web (easiest, runs in your browser)
 
 npm run web
 
-# or
+** or **
 
 npx expo start # then press "w"
 
@@ -135,28 +146,18 @@ Scan the QR code with Expo Go.
 
 3. Common scripts & tips
 
-From mobile/:
-
-npm start # expo start (choose web/android/ios in the CLI)
-npm run web # open in the browser
-npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
-
-From backend/:
-npm run dev
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-
-From backend/src:
+### From backend/src:
 
 Assuming xampp is under C drive otherwise change the path of the following command:
 "C:\xampp\php\php.exe" -S 0.0.0.0:8080
 
-Under mobile, run the following command
-to save authentication token on device storage:
-npm install @react-native-async-storage/async-storage
+### From backend/:
 
-for the dropdown list run :
-npm install react-native-element-dropdown
+npm run dev
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
-for the report :
-npm install react-native-chart-kit react-native-svg
-npm install expo-print expo-sharing
+### From mobile/:
+
+npm start # expo start (choose web/android/ios in the CLI)
+npm run web # open in the browser
+npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
