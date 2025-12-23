@@ -20,6 +20,10 @@ MS-Symptoms-Diary/
 
 - (Optional) Expo Go app on your phone (for on-device testing)
 
+- Create a new database with the name **multiplesclerosisdb** on phpMyAdmin on the xampp server and add the tables needed:
+  - Import the database schema **multiplesclerosisdb.sql** to the newly created database,
+  - Run the query **query.txt**.
+
 ### Backend (FastAPI)
 
 - Create & activate a virtual environment, install deps, run server
@@ -124,6 +128,8 @@ Assuming xampp is running and it is under C drive otherwise change the path of t
 "C:\xampp\php\php.exe" -S 0.0.0.0:8080
 
 ### From backend/:
+
+Run one of the following commands:
 
 - npm run dev
 - uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
