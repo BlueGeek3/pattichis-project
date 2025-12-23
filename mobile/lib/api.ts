@@ -44,8 +44,10 @@ function detectHost(): string {
 }
 
 const HOST = detectHost();
-export const BASE = `http://${HOST}:${PORT}/ms-api`;
-export const USER_IP = `http://${HOST}:${PORT2}`;
+// export const BASE = `http://${HOST}:${PORT}/ms-api`;
+// export const USER_IP = `http://${HOST}:${PORT2}`;
+export const BASE = "https://msdiary-node.loca.lt/ms-api";
+export const USER_IP = "https://msdiary-php.loca.lt";
 
 async function handle<T>(res: Response, path: string): Promise<T> {
   const text = await res.text();
