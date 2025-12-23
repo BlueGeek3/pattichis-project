@@ -104,7 +104,7 @@ const BASE = "http://localhost/ms-api"; // <- if you also run your PHP ms-api on
 
 If you’re only testing the FastAPI /healthz and not the PHP endpoints, you can temporarily point to http://127.0.0.1:8000 and consume that instead.
 
-**Under mobile, run the following command to save authentication username on device storage:**
+**To save authentication username on device storage:**
 npm install @react-native-async-storage/async-storage
 
 **For the dropdown list run :**
