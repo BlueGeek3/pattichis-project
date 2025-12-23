@@ -130,11 +130,11 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 
 ### From mobile/:
 
-npm start # expo start (choose web/android/ios in the CLI)
-npm run web # open in the browser
-npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
+- npm start # expo start (choose web/android/ios in the CLI)
+- npm run web # open in the browser
+- npx expo start -c # clear Metro bundler cache (use if images/paths get weird)
 
-A) Web (easiest, runs in your browser)
+**A) Web (easiest, runs in your browser)**
 
 npm run web
 
@@ -145,11 +145,11 @@ npx expo start # then press "w"
 This opens http://localhost:19006.
 You should see the Intro screen → “Get Started” → bottom tabs (Home, History, Log, Profile).
 
-B) Android emulator (if installed)
+**B) Android emulator (if installed)**
 
 npx expo start # then press "a"
 
-C) Physical device (Expo Go)
+**C) Physical device (Expo Go)**
 
 Ensure PC and phone are on the same Wi-Fi.
 
@@ -157,7 +157,7 @@ In lib/api.ts set:
 
 const BASE = "http://<your-pc-lan-ip>/ms-api";
 
-Start Expo:
+**Start Expo:**
 
 npx expo start
 
