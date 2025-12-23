@@ -20,28 +20,29 @@ MS-Symptoms-Diary/
 
 - (Optional) Expo Go app on your phone (for on-device testing)
 
-1. Backend (FastAPI)
-   Create & activate a virtual environment, install deps, run server
+### Backend (FastAPI)
 
-## From repo root
+- Create & activate a virtual environment, install deps, run server
+
+**From repo root**
 
 cd backend
 
-Create a local venv (recommended name: .venv so it's ignored by git)
+**Create a local venv (recommended name: .venv so it's ignored by git)**
 
 python -m venv .venv
 
-Activate it
+**Activate it**
 
-### Windows (PowerShell):
+1. Windows (PowerShell):
 
 .venv\Scripts\Activate.ps1
 
-### Windows (cmd):
+2. Windows (cmd):
 
 .venv\Scripts\activate.bat
 
-### macOS/Linux:
+3. macOS/Linux:
 
 source .venv/bin/activate
 
