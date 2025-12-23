@@ -75,23 +75,22 @@ Open http://127.0.0.1:8000/healthz
 
 Tip: stop the server with Ctrl+C. Deactivate the venv with deactivate.
 
-2. Mobile (Expo / React Native)
-   Install dependencies
+### Mobile (Expo / React Native) Install dependencies
 
-## From repo root
+**From repo root**
 
 cd mobile
 
-## Install node dependencies
+**Install node dependencies**
 
 npm install
 
-### (If you’ve never installed these on this machine, run once)
+**(If you’ve never installed these on this machine, run once)**
 
 npm i @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-paper
 npx expo install react-native-screens react-native-safe-area-context
 
-Configure API base URL
+**Configure API base URL**
 
 The mobile app fetches data from a backend/API. By default we use PC web development settings.
 
